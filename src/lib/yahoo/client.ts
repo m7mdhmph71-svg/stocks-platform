@@ -109,6 +109,18 @@ export async function yahooJson<T = unknown>(
     // جلسة منتهية — جدّد وأعد المحاولة مرة واحدة
     res = await attempt(true);
   }
+
+  // حد المعدل أو خطأ خادم مؤقت — تراجع تدريجي حتى محاولتين إضافيتين
+  for (let retry = 0; retry < 2 && (res.status === 429 || res.status >= 500); retry++) {
+    const retryAfter = Number(res.headers.get("retry-after"));
+    const waitMs =
+      Number.isFinite(retryAfter) && retryAfter > 0
+        ? Math.min(retryAfter * 1000, 10_000)
+        : 1500 * (retry + 1);
+    await new Promise((r) => setTimeout(r, waitMs));
+    res = await attempt(false);
+  }
+
   if (!res.ok) {
     throw new Error(`yahoo: ${res.status} ${res.statusText} for ${url}`);
   }
