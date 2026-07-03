@@ -16,6 +16,7 @@ import { StockTable } from "@/components/StockTable";
 import { FilterBuilder } from "@/components/FilterBuilder";
 import { LegendPanel } from "@/components/LegendPanel";
 import { HistoryPanel } from "@/components/HistoryPanel";
+import { BacktestPanel } from "@/components/BacktestPanel";
 import { SourceBanner } from "@/components/SourceBanner";
 import { TableSkeleton } from "@/components/Skeletons";
 import { EmptyState, ErrorBox } from "@/components/States";
@@ -249,8 +250,18 @@ export function ScreenerClient() {
         </button>
       </div>
 
-      {/* سجل النتائج السابقة */}
-      {tab === "history" ? <HistoryPanel /> : null}
+      {/* السجل: الاختبار التاريخي + لقطات الاستخدام */}
+      {tab === "history" ? (
+        <>
+          <BacktestPanel />
+          <div className="pt-2">
+            <h2 className="mb-3 font-bold text-zinc-900 dark:text-zinc-50">
+              لقطاتك المحفوظة
+            </h2>
+            <HistoryPanel />
+          </div>
+        </>
+      ) : null}
 
       {/* وصف الاستراتيجية + اللوحة التوضيحية */}
       {tab === "history" ? null : preset ? (
