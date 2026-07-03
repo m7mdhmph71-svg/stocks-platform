@@ -7,6 +7,8 @@ import {
   BacktestResult,
   BacktestStrategy,
   runBacktest,
+  summarizeBacktest,
+  TRADE_HORIZON,
 } from "@/lib/backtest/engine";
 
 export const dynamic = "force-dynamic";
@@ -104,8 +106,7 @@ async function buildBacktest(
       .filter((d) => d.signals.length > 0);
 
     // أعِد حساب الملخص بعد الفلترة
-    const filtered = runBacktestSummaryFrom(prelim);
-    prelim.summary = filtered;
+    prelim.summary = summarizeBacktest(prelim.days, prelim.summary.daysTested);
   }
 
   if (dropped > 0) {
@@ -117,6 +118,7 @@ async function buildBacktest(
     notesAr.push(`استُبعد ${unknownFloat} رمزاً مجهول الأسهم الحرة.`);
   }
   notesAr.push(
+    `خطة الصفقة المحاكاة: دخول عند إغلاق جلسة الإشارة، خروج عند الهدف الأول أو الوقف (المحسوبين بمحرك أهداف المنصة من بيانات ما قبل الإشارة فقط) — الوقف يُغلَّب تحفظاً إن لامسا معاً في جلسة واحدة، وخروج زمني بعد ${TRADE_HORIZON} جلسة.`,
     `الكون: أعلى ${series.length} سهماً سيولة حالياً بنطاق سعري 0.5-15$ — أسهم شُطبت أو تغيرت جذرياً لا يشملها الاختبار (انحياز البقاء).`,
     "الشروط مقيسة على أسعار إغلاق الجلسات (الفرز الحي يقيسها لحظياً أثناء التداول)، والحجم النسبي مُقرَّب بمتوسط 20 جلسة."
   );
@@ -126,37 +128,6 @@ async function buildBacktest(
     asOf: new Date().toISOString(),
     universeSize: series.length,
     notesAr,
-  };
-}
-
-/** إعادة حساب الملخص من الأيام بعد فلترة الأسهم الحرة */
-function runBacktestSummaryFrom(res: BacktestResult): BacktestResult["summary"] {
-  const all = res.days.flatMap((d) => d.signals);
-  const avg = (xs: number[]): number | null =>
-    xs.length > 0 ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
-  const r1 = all.map((s) => s.ret1d).filter((x): x is number => x !== null);
-  const r5 = all.map((s) => s.ret5d).filter((x): x is number => x !== null);
-  const rn = all.map((s) => s.retToNow).filter((x): x is number => x !== null);
-  const withR5 = all.filter((s) => s.ret5d !== null);
-  return {
-    totalSignals: all.length,
-    daysWithSignals: res.days.length,
-    daysTested: res.summary.daysTested,
-    avgRet1d: avg(r1),
-    avgRet5d: avg(r5),
-    avgRetToNow: avg(rn),
-    winRate1d:
-      r1.length > 0 ? (r1.filter((x) => x > 0).length / r1.length) * 100 : null,
-    winRate5d:
-      r5.length > 0 ? (r5.filter((x) => x > 0).length / r5.length) * 100 : null,
-    best:
-      withR5.length > 0
-        ? withR5.reduce((m, s) => ((s.ret5d ?? 0) > (m.ret5d ?? 0) ? s : m))
-        : null,
-    worst:
-      withR5.length > 0
-        ? withR5.reduce((m, s) => ((s.ret5d ?? 0) < (m.ret5d ?? 0) ? s : m))
-        : null,
   };
 }
 

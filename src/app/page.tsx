@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PRESETS } from "@/lib/filters/presets";
+import { SearchBox } from "@/components/SearchBox";
 import { StrategyCard } from "@/components/StrategyCard";
 import { LimitDonut } from "@/components/LimitDonut";
 import { SectionTitle } from "@/components/ui";
@@ -35,6 +36,14 @@ export default function HomePage() {
             <a href="#shariah" className="btn-ghost px-6 py-2.5 text-base">
               كيف نفحص الشرعية؟
             </a>
+          </div>
+
+          {/* فحص سهم بعينه مباشرة */}
+          <div className="mx-auto mt-10 max-w-xl text-start">
+            <p className="mb-2 text-center text-sm font-medium text-zinc-700 dark:text-zinc-200">
+              أو افحص سهماً بعينه الآن — الحكم الشرعي ونسبة التطهير والأهداف:
+            </p>
+            <SearchBox variant="hero" />
           </div>
         </div>
       </section>

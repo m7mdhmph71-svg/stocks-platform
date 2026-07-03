@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { SearchBox } from "@/components/SearchBox";
 
 const links = [
   { href: "/", label: "الرئيسية" },
@@ -11,15 +11,6 @@ const links = [
 
 export function Nav() {
   const pathname = usePathname();
-  const router = useRouter();
-  const [q, setQ] = useState("");
-
-  function goToTicker() {
-    const ticker = q.trim().toUpperCase();
-    if (!ticker) return;
-    setQ("");
-    router.push(`/stock/${encodeURIComponent(ticker)}`);
-  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/85 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/85">
@@ -55,20 +46,7 @@ export function Nav() {
         </nav>
 
         <div className="ms-auto flex items-center gap-3">
-          <label className="relative block">
-            <span className="sr-only">بحث سريع عن رمز سهم</span>
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") goToTicker();
-              }}
-              dir="ltr"
-              placeholder="AAPL …رمز السهم"
-              className="field w-36 rounded-full py-1.5 text-left uppercase sm:w-48"
-              aria-label="ابحث برمز السهم ثم اضغط إدخال"
-            />
-          </label>
+          <SearchBox variant="nav" />
         </div>
       </div>
 

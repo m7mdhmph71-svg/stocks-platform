@@ -19,6 +19,42 @@ const STRATEGY_LABELS: Record<Strategy, string> = {
 
 const DAY_OPTIONS = [10, 20, 30, 40];
 
+const OUTCOME_CHIP: Record<
+  string,
+  { label: string; cls: string }
+> = {
+  target: {
+    label: "هدف ✓",
+    cls: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300",
+  },
+  stop: {
+    label: "وقف ✗",
+    cls: "bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-300",
+  },
+  time: {
+    label: "خروج زمني",
+    cls: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300",
+  },
+  open: {
+    label: "جارية",
+    cls: "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300",
+  },
+};
+
+function OutcomeChip({ outcome }: { outcome: string }) {
+  const c = OUTCOME_CHIP[outcome] ?? OUTCOME_CHIP.time;
+  return (
+    <span
+      className={
+        "inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium " +
+        c.cls
+      }
+    >
+      {c.label}
+    </span>
+  );
+}
+
 function StatTile({
   label,
   value,
@@ -143,42 +179,66 @@ export function BacktestPanel() {
 
       {data && !loading ? (
         <div className="space-y-4">
-          {/* الملخص */}
+          {/* الملخص: محاكاة خطة الهدف/الوقف */}
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
             <StatTile
-              label="إشارات الفلتر"
-              value={String(data.summary.totalSignals)}
-              hint={`في ${data.summary.daysWithSignals} جلسة من ${days}`}
+              label="الصفقات المحسومة"
+              value={String(data.summary.closedTrades)}
+              hint={
+                `${data.summary.totalSignals} إشارة في ${data.summary.daysWithSignals} جلسة` +
+                (data.summary.openTrades > 0
+                  ? ` · ${data.summary.openTrades} جارية`
+                  : "")
+              }
             />
             <StatTile
-              label="متوسط عائد الجلسة التالية"
-              value={fmtPercent(data.summary.avgRet1d)}
-              colorClass={changeColorClass(data.summary.avgRet1d)}
+              label="أصابت الهدف"
+              value={fmtPercent(data.summary.targetHitRate, 0).replace("+", "")}
+              colorClass="text-emerald-600 dark:text-emerald-400"
+              hint={`${data.summary.targetHits} صفقة`}
             />
             <StatTile
-              label="متوسط عائد 5 جلسات"
-              value={fmtPercent(data.summary.avgRet5d)}
-              colorClass={changeColorClass(data.summary.avgRet5d)}
+              label="ضربت الوقف"
+              value={fmtPercent(data.summary.stopHitRate, 0).replace("+", "")}
+              colorClass="text-red-600 dark:text-red-400"
+              hint={`${data.summary.stopHits} صفقة · ${data.summary.timeExits} خروج زمني`}
             />
             <StatTile
-              label="نسبة الرابحة بعد جلسة"
-              value={fmtPercent(data.summary.winRate1d, 0).replace("+", "")}
+              label="متوسط عائد الصفقة"
+              value={fmtPercent(data.summary.avgTradeReturn)}
+              colorClass={changeColorClass(data.summary.avgTradeReturn)}
             />
             <StatTile
-              label="نسبة الرابحة بعد 5 جلسات"
-              value={fmtPercent(data.summary.winRate5d, 0).replace("+", "")}
+              label="معامل الربح"
+              value={
+                data.summary.profitFactor !== null
+                  ? data.summary.profitFactor.toFixed(2)
+                  : "—"
+              }
+              colorClass={
+                data.summary.profitFactor !== null
+                  ? data.summary.profitFactor >= 1
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-red-600 dark:text-red-400"
+                  : undefined
+              }
+              hint="الأرباح ÷ الخسائر (فوق 1 = رابح)"
             />
             <StatTile
-              label="متوسط العائد حتى الآن"
-              value={fmtPercent(data.summary.avgRetToNow)}
-              colorClass={changeColorClass(data.summary.avgRetToNow)}
+              label="متوسط مدة الصفقة"
+              value={
+                data.summary.avgSessionsHeld !== null
+                  ? data.summary.avgSessionsHeld.toFixed(1)
+                  : "—"
+              }
+              hint="جلسات حتى الخروج"
             />
           </div>
 
           {data.summary.best && data.summary.worst ? (
             <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
               <span className="text-zinc-600 dark:text-zinc-300">
-                أفضل إشارة (5 جلسات):{" "}
+                أفضل صفقة:{" "}
                 <Link
                   href={`/stock/${data.summary.best.ticker}`}
                   className="font-bold text-brand-700 hover:underline dark:text-brand-400"
@@ -187,14 +247,17 @@ export function BacktestPanel() {
                   {data.summary.best.ticker}
                 </Link>{" "}
                 <span
-                  className={"font-bold " + changeColorClass(data.summary.best.ret5d)}
+                  className={
+                    "font-bold " +
+                    changeColorClass(data.summary.best.tradeReturnPercent)
+                  }
                   dir="ltr"
                 >
-                  {fmtPercent(data.summary.best.ret5d)}
+                  {fmtPercent(data.summary.best.tradeReturnPercent)}
                 </span>
               </span>
               <span className="text-zinc-600 dark:text-zinc-300">
-                أسوأ إشارة:{" "}
+                أسوأ صفقة:{" "}
                 <Link
                   href={`/stock/${data.summary.worst.ticker}`}
                   className="font-bold text-brand-700 hover:underline dark:text-brand-400"
@@ -204,11 +267,12 @@ export function BacktestPanel() {
                 </Link>{" "}
                 <span
                   className={
-                    "font-bold " + changeColorClass(data.summary.worst.ret5d)
+                    "font-bold " +
+                    changeColorClass(data.summary.worst.tradeReturnPercent)
                   }
                   dir="ltr"
                 >
-                  {fmtPercent(data.summary.worst.ret5d)}
+                  {fmtPercent(data.summary.worst.tradeReturnPercent)}
                 </span>
               </span>
             </div>
@@ -251,11 +315,12 @@ export function BacktestPanel() {
                       <thead>
                         <tr className="border-b border-zinc-200 text-xs text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
                           <th className="p-2.5 text-start font-medium">الرمز</th>
-                          <th className="p-2.5 text-end font-medium">سعر الإشارة</th>
-                          <th className="p-2.5 text-end font-medium">من الافتتاح</th>
-                          <th className="p-2.5 text-end font-medium">+ جلسة</th>
-                          <th className="p-2.5 text-end font-medium">+ 5 جلسات</th>
-                          <th className="p-2.5 text-end font-medium">حتى الآن</th>
+                          <th className="p-2.5 text-end font-medium">الدخول</th>
+                          <th className="p-2.5 text-end font-medium">الهدف</th>
+                          <th className="p-2.5 text-end font-medium">الوقف</th>
+                          <th className="p-2.5 text-start font-medium">النتيجة</th>
+                          <th className="p-2.5 text-end font-medium">عائد الصفقة</th>
+                          <th className="p-2.5 text-end font-medium">الجلسات</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -279,22 +344,33 @@ export function BacktestPanel() {
                             <td className="p-2.5 text-end tabular-nums text-zinc-900 dark:text-zinc-50">
                               {fmtPrice(s.price)}
                             </td>
-                            <td className="p-2.5 text-end tabular-nums text-zinc-600 dark:text-zinc-300">
-                              <span dir="ltr">
-                                {fmtPercent(s.changeFromOpenPercent, 1)}
-                              </span>
+                            <td className="p-2.5 text-end tabular-nums text-emerald-700 dark:text-emerald-400">
+                              {fmtPrice(s.target)}
                             </td>
-                            {[s.ret1d, s.ret5d, s.retToNow].map((r, i) => (
-                              <td
-                                key={i}
-                                className={
-                                  "p-2.5 text-end font-bold tabular-nums " +
-                                  changeColorClass(r)
-                                }
-                              >
-                                <span dir="ltr">{fmtPercent(r, 1)}</span>
-                              </td>
-                            ))}
+                            <td className="p-2.5 text-end tabular-nums text-red-700 dark:text-red-400">
+                              {fmtPrice(s.stop)}
+                            </td>
+                            <td className="p-2.5">
+                              <OutcomeChip outcome={s.outcome} />
+                            </td>
+                            <td
+                              className={
+                                "p-2.5 text-end font-bold tabular-nums " +
+                                changeColorClass(s.tradeReturnPercent)
+                              }
+                            >
+                              <span dir="ltr">
+                                {fmtPercent(s.tradeReturnPercent, 1)}
+                              </span>
+                              {s.outcome === "open" ? (
+                                <span className="ms-1 align-middle text-[10px] font-normal text-zinc-400">
+                                  غير محقق
+                                </span>
+                              ) : null}
+                            </td>
+                            <td className="p-2.5 text-end tabular-nums text-zinc-600 dark:text-zinc-300">
+                              {s.sessionsHeld ?? "—"}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
