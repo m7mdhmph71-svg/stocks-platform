@@ -70,7 +70,10 @@ function ScoreMeter({ score }: { score: number | null }) {
         <span className="font-medium text-zinc-700 dark:text-zinc-200">
           درجة الفرصة
         </span>
-        <span className="font-bold tabular-nums text-zinc-900 dark:text-zinc-50">
+        <span
+          dir="ltr"
+          className="font-bold tabular-nums text-zinc-900 dark:text-zinc-50"
+        >
           {Math.round(v)} / 100
         </span>
       </div>

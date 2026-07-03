@@ -122,11 +122,9 @@ export async function GET(
     const stats = lastSessionStats(candles);
     const price =
       meta?.regularMarketPrice ?? stats?.last.close ?? 0;
-    const prevClose =
-      meta?.chartPreviousClose ??
-      meta?.previousClose ??
-      stats?.prev?.close ??
-      null;
+    // إغلاق الأمس: من الشموع (ما قبل الأخيرة) — لا نستخدم chartPreviousClose
+    // لأنه في مدى 5d يعني «الإغلاق قبل النافذة» أي قبل ٥ جلسات لا الأمس.
+    const prevClose = stats?.prev?.close ?? meta?.previousClose ?? null;
 
     const changePercent =
       prevClose && prevClose > 0 ? ((price - prevClose) / prevClose) * 100 : null;

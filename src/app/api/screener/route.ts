@@ -15,6 +15,7 @@ import { runYahooScreener, CoarseQuery } from "@/lib/yahoo/screener";
 import { fetchFundamentalsBatch } from "@/lib/yahoo/quote";
 import { fetchCandles } from "@/lib/yahoo/chart";
 import { computeTechnicals } from "@/lib/targets/technicals";
+import { computeTargets } from "@/lib/targets/engine";
 import { screenShariah } from "@/lib/shariah/screen";
 import { finvizAvailable, fetchFinvizRows } from "@/lib/finviz";
 import { demoRows, demoFundamentals } from "@/lib/demo/dataset";
@@ -96,7 +97,7 @@ async function enrichFundamentals(rows: StockRow[]): Promise<StockRow[]> {
   });
 }
 
-/** إثراء أداء الأسبوع من الشموع لمن يحتاجه */
+/** إثراء أداء الأسبوع من الشموع لمن يحتاجه (3 أشهر — نفس كاش إثراء الأهداف) */
 async function enrichWeekPerf(rows: StockRow[]): Promise<StockRow[]> {
   const out: StockRow[] = [];
   const CONC = 6;
@@ -105,7 +106,7 @@ async function enrichWeekPerf(rows: StockRow[]): Promise<StockRow[]> {
     const enriched = await Promise.all(
       batch.map(async (r) => {
         if (r.weekPerfPercent !== null) return r;
-        const candles = await fetchCandles(r.ticker, "1mo");
+        const candles = await fetchCandles(r.ticker, "3mo");
         if (candles.length >= 6) {
           const last = candles[candles.length - 1].close;
           const ref = candles[candles.length - 6].close;
@@ -114,6 +115,36 @@ async function enrichWeekPerf(rows: StockRow[]): Promise<StockRow[]> {
           }
         }
         return r;
+      })
+    );
+    out.push(...enriched);
+  }
+  return out;
+}
+
+/** كم صفاً نحسب له الأهداف والدرجة في نتائج الفرز (كلفة شموع إضافية) */
+const TARGETS_CAP = 40;
+
+/** إثراء الأهداف ودرجة الفرصة لأعلى الصفوف — تظهر في جدول النتائج */
+async function enrichTargets(
+  rows: StockRow[],
+  strategy: StrategyKey
+): Promise<StockRow[]> {
+  const out: StockRow[] = [];
+  const CONC = 6;
+  for (let i = 0; i < rows.length; i += CONC) {
+    const batch = rows.slice(i, i + CONC);
+    const enriched = await Promise.all(
+      batch.map(async (r, j) => {
+        if (i + j >= TARGETS_CAP || r.targets !== null) return r;
+        const candles = await fetchCandles(r.ticker, "3mo");
+        if (candles.length < 20) return r;
+        const tech = computeTechnicals(candles);
+        return {
+          ...r,
+          weekPerfPercent: r.weekPerfPercent ?? tech.weekPerfPercent,
+          targets: computeTargets(strategy, r.price, tech, null),
+        };
       })
     );
     out.push(...enriched);
@@ -248,7 +279,11 @@ async function screenLive(
         console.log(`longterm tech: ${r.ticker} fails: ${gate.failsAr.join("; ")}`);
         continue;
       }
-      final.push({ ...r, weekPerfPercent: tech.weekPerfPercent });
+      final.push({
+        ...r,
+        weekPerfPercent: tech.weekPerfPercent,
+        targets: computeTargets("longterm", r.price, tech, null),
+      });
     }
     notesAr.push(
       "ملاحظة: نمو 5 سنوات مُقرَّب من آخر 4 سنوات متاحة، وROI مُقرَّب بالعائد على حقوق الملكية (حدود بيانات المصدر المجاني)."
@@ -285,6 +320,12 @@ async function screenLive(
   if (weekConds.length > 0) {
     rows = await enrichWeekPerf(rows);
     rows = applyConditions(rows, weekConds);
+  }
+
+  // الأهداف ودرجة الفرصة للنتائج النهائية (المخصص يُقيَّم بمنطق السوينق)
+  rows = await enrichTargets(rows, preset === "custom" ? "momentum" : preset);
+  if (rows.length > TARGETS_CAP) {
+    notesAr.push(`حُسبت الأهداف والدرجة لأعلى ${TARGETS_CAP} نتيجة.`);
   }
 
   notesAr.push("المصدر: Yahoo Finance (فرز مخصص + بيانات أساسية).");
