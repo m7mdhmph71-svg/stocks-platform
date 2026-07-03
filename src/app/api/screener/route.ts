@@ -75,10 +75,14 @@ function coarseFromConditions(conds: FilterCondition[]): CoarseQuery {
 /** إثراء صفوف بالبيانات الأساسية: القطاع، الأسهم الحرة، والفحص الشرعي.
  * تُرقَّع القيمة السوقية وعدد الأسهم من بيانات الفرز عند غيابها في القوائم
  * كي لا يتحول الفحص الشرعي إلى UNKNOWN بلا داعٍ. */
-async function enrichFundamentals(rows: StockRow[]): Promise<StockRow[]> {
+async function enrichFundamentals(
+  rows: StockRow[]
+): Promise<{ rows: StockRow[]; missing: number }> {
   const funds = await fetchFundamentalsBatch(rows.map((r) => r.ticker));
-  return rows.map((r) => {
+  let missing = 0;
+  const enriched = rows.map((r) => {
     const f0 = funds.get(r.ticker) ?? null;
+    if (!f0) missing++;
     const f = f0
       ? {
           ...f0,
@@ -95,6 +99,7 @@ async function enrichFundamentals(rows: StockRow[]): Promise<StockRow[]> {
       shariah: screenShariah(f),
     };
   });
+  return { rows: enriched, missing };
 }
 
 /** إثراء أداء الأسبوع من الشموع لمن يحتاجه (3 أشهر — نفس كاش إثراء الأهداف) */
@@ -186,7 +191,7 @@ async function screenLive(
   if (preset !== "custom" && finvizAvailable()) {
     const fv = await fetchFinvizRows(PRESETS[preset].finvizQuery);
     if (fv && fv.length > 0) {
-      const rows = await enrichFundamentals(fv.slice(0, ENRICH_CAP));
+      const { rows } = await enrichFundamentals(fv.slice(0, ENRICH_CAP));
       return {
         preset,
         source: "finviz",
@@ -282,7 +287,12 @@ async function screenLive(
       final.push({
         ...r,
         weekPerfPercent: tech.weekPerfPercent,
-        targets: computeTargets("longterm", r.price, tech, null),
+        targets: computeTargets(
+          "longterm",
+          r.price,
+          tech,
+          funds.get(r.ticker)?.targetMeanPrice ?? null
+        ),
       });
     }
     notesAr.push(
@@ -311,8 +321,17 @@ async function screenLive(
   }
 
   // إثراء الأسهم الحرة + الشرعية
-  rows = await enrichFundamentals(rows);
+  const enrichedResult = await enrichFundamentals(rows);
+  rows = enrichedResult.rows;
   const floatConds = conds.filter((c) => c.field === "floatShares");
+  if (enrichedResult.missing > 0) {
+    notesAr.push(
+      `تعذّر جلب القوائم المالية لـ ${enrichedResult.missing} من ${rows.length} سهماً` +
+        (floatConds.length > 0
+          ? " — قد تنقص النتائج لأن شرط الأسهم الحرة يتطلبها."
+          : " — فحصها الشرعي «غير معروف».")
+    );
+  }
   if (floatConds.length > 0) rows = applyConditions(rows, floatConds);
 
   // أداء الأسبوع إن كان مطلوباً في الشروط

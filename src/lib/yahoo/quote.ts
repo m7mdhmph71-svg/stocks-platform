@@ -137,10 +137,21 @@ async function fetchImpl(ticker: string): Promise<Fundamentals | null> {
 /**
  * جلب الأساسيات مع كاش ٦ ساعات بمفتاح fund:{ticker}.
  * هذه الدالة تحديداً لا ترمي — عند أي فشل تعيد null (الفحص الشرعي يتحول UNKNOWN).
+ *
+ * القيمة تُغلَّف في صندوق {v} كي تُكاش أيضاً نتيجة «لا بيانات» (null) —
+ * وإلا أعيد ضرب ياهو في كل فرز لكل رمز بلا quoteSummary. أخطاء الشبكة
+ * العابرة تُرمى من fetchImpl فلا تُكاش، ويُعاد المحاولة في الطلب التالي.
  */
+interface Boxed {
+  v: Fundamentals | null;
+}
+
 export async function fetchFundamentals(ticker: string): Promise<Fundamentals | null> {
   try {
-    return await cached(`fund:${ticker}`, TTL_MS, () => fetchImpl(ticker));
+    const boxed = await cached<Boxed>(`fund:${ticker}`, TTL_MS, async () => ({
+      v: await fetchImpl(ticker),
+    }));
+    return boxed.v;
   } catch {
     return null;
   }

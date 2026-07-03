@@ -31,6 +31,8 @@ interface ChartMeta {
   fullExchangeName?: string;
   exchangeName?: string;
   regularMarketPrice?: number;
+  /** آخر وقت تداول (unix ثوانٍ) — لمطابقة جلسة آخر شمعة */
+  regularMarketTime?: number;
   chartPreviousClose?: number;
   previousClose?: number;
   regularMarketVolume?: number;
@@ -122,16 +124,28 @@ export async function GET(
     const stats = lastSessionStats(candles);
     const price =
       meta?.regularMarketPrice ?? stats?.last.close ?? 0;
+
+    // هل آخر شمعة تعود لنفس جلسة آخر تداول؟ (كاش الشموع 15 دقيقة قد يتأخر
+    // عن ميتا السعر عند الافتتاح، فتكون آخر شمعة من جلسة سابقة)
+    const utcDay = (sec: number) => new Date(sec * 1000).toISOString().slice(0, 10);
+    const sameSession =
+      stats !== null && typeof meta?.regularMarketTime === "number"
+        ? utcDay(stats.last.time) === utcDay(meta.regularMarketTime)
+        : true;
+
     // إغلاق الأمس: من الشموع (ما قبل الأخيرة) — لا نستخدم chartPreviousClose
     // لأنه في مدى 5d يعني «الإغلاق قبل النافذة» أي قبل ٥ جلسات لا الأمس.
-    const prevClose = stats?.prev?.close ?? meta?.previousClose ?? null;
+    // وإن كانت آخر شمعة من جلسة سابقة فهي نفسها «إغلاق الأمس».
+    const prevClose = sameSession
+      ? stats?.prev?.close ?? meta?.previousClose ?? null
+      : stats?.last.close ?? meta?.previousClose ?? null;
 
     const changePercent =
       prevClose && prevClose > 0 ? ((price - prevClose) / prevClose) * 100 : null;
 
-    // التغير من الافتتاح: من شمعة اليوم إذا كانت آخر شمعة لليوم الحالي
+    // التغير من الافتتاح: فقط عندما تكون آخر شمعة من جلسة السعر الحالي نفسها
     let changeFromOpenPercent: number | null = null;
-    if (stats?.last && stats.last.open > 0) {
+    if (sameSession && stats?.last && stats.last.open > 0) {
       changeFromOpenPercent =
         ((price - stats.last.open) / stats.last.open) * 100;
     }

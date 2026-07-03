@@ -93,10 +93,18 @@ export const HARAM_SUMMARY_RULES: readonly {
   pattern: RegExp;
   reasonAr: string;
 }[] = [
-  { pattern: /\bpork\b|\bswine\b/i, reasonAr: "منتجات لحم الخنزير" },
+  // «pork» فقط: كلمة swine وحدها تَرِد في شركات صحة الحيوان المباحة
+  // (مثل Zoetis البيطرية) ضمن قوائم الأنواع التي تخدمها، فلا تُعد دليلاً
+  // على إنتاج لحم الخنزير. منتجو اللحم الفعليون يذكرون pork صراحة.
   {
+    pattern: /\bpork\b|swine (meat|products)|\bham\b|\bbacon\b|\bprosciutto\b/i,
+    reasonAr: "منتجات لحم الخنزير",
+  },
+  {
+    // lookbehind يمنع مطابقة nonalcoholic / non-alcoholic (صيغة ياهو
+    // المعتادة لوصف شركات المشروبات غير الكحولية مثل كوكاكولا)
     pattern:
-      /alcoholic beverage|\bliquor\b|\bbrewer(y|ies)?\b|\bbrewing\b|winer(y|ies)|distiller|\bvodka\b|whisk(e)?y\b/i,
+      /(?<!non)(?<!non-)alcoholic beverage|\bliquor\b|\bbrewer(y|ies)?\b|\bbrewing\b|winer(y|ies)|distiller|\bvodka\b|whisk(e)?y\b/i,
     reasonAr: "إنتاج أو توزيع المشروبات الكحولية",
   },
   {
