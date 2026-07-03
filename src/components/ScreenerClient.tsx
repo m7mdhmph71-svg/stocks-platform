@@ -10,15 +10,17 @@ import {
   StrategyKey,
 } from "@/lib/types";
 import { PRESETS } from "@/lib/filters/presets";
+import { saveSnapshot } from "@/lib/history";
 import { fetchJson, fmtDateTimeAr } from "@/components/ui";
 import { StockTable } from "@/components/StockTable";
 import { FilterBuilder } from "@/components/FilterBuilder";
 import { LegendPanel } from "@/components/LegendPanel";
+import { HistoryPanel } from "@/components/HistoryPanel";
 import { SourceBanner } from "@/components/SourceBanner";
 import { TableSkeleton } from "@/components/Skeletons";
 import { EmptyState, ErrorBox } from "@/components/States";
 
-type Tab = StrategyKey | "custom";
+type Tab = StrategyKey | "custom" | "history";
 
 const STRATEGY_KEYS: StrategyKey[] = ["liquidity", "momentum", "longterm"];
 
@@ -89,9 +91,11 @@ export function ScreenerClient() {
   const tab: Tab =
     presetParam === "custom"
       ? "custom"
-      : STRATEGY_KEYS.includes(presetParam as StrategyKey)
-        ? (presetParam as StrategyKey)
-        : "liquidity";
+      : presetParam === "history"
+        ? "history"
+        : STRATEGY_KEYS.includes(presetParam as StrategyKey)
+          ? (presetParam as StrategyKey)
+          : "liquidity";
 
   const customConditions = useMemo(
     () => parseConditionsParam(conditionsParam),
@@ -104,6 +108,7 @@ export function ScreenerClient() {
   const [refresh, setRefresh] = useState(0);
 
   const url = useMemo(() => {
+    if (tab === "history") return null;
     if (tab === "custom") {
       if (customConditions.length === 0) return null;
       return (
@@ -126,7 +131,17 @@ export function ScreenerClient() {
     setError(null);
     fetchJson<ScreenerResponse>(url)
       .then((res) => {
-        if (!cancelled) setData(res);
+        if (!cancelled) {
+          setData(res);
+          // لقطة تلقائية لسجل النتائج (تُتجاهل التجريبية والفارغة)
+          const nameAr =
+            tab === "custom"
+              ? "فلتر مخصص"
+              : tab !== "history"
+                ? PRESETS[tab].nameAr
+                : "";
+          if (nameAr) saveSnapshot(tab, nameAr, res);
+        }
       })
       .catch((e: unknown) => {
         if (!cancelled) {
@@ -140,7 +155,7 @@ export function ScreenerClient() {
     return () => {
       cancelled = true;
     };
-  }, [url, refresh]);
+  }, [url, refresh, tab]);
 
   const switchTab = useCallback(
     (next: Tab) => {
@@ -166,7 +181,8 @@ export function ScreenerClient() {
     [router]
   );
 
-  const preset = tab !== "custom" ? PRESETS[tab] : null;
+  const preset =
+    tab !== "custom" && tab !== "history" ? PRESETS[tab] : null;
 
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-8 sm:px-6">
@@ -217,10 +233,27 @@ export function ScreenerClient() {
         >
           فلتر مخصص
         </button>
+        <button
+          role="tab"
+          aria-selected={tab === "history"}
+          type="button"
+          onClick={() => switchTab("history")}
+          className={
+            "rounded-full px-4 py-2 text-sm font-medium transition-colors " +
+            (tab === "history"
+              ? "bg-brand-600 text-white shadow-sm"
+              : "border border-zinc-300 bg-white text-zinc-600 hover:border-brand-400 hover:text-brand-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:text-brand-400")
+          }
+        >
+          السجل
+        </button>
       </div>
 
+      {/* سجل النتائج السابقة */}
+      {tab === "history" ? <HistoryPanel /> : null}
+
       {/* وصف الاستراتيجية + اللوحة التوضيحية */}
-      {preset ? (
+      {tab === "history" ? null : preset ? (
         <>
           <div className="card p-4 sm:p-5">
             <div className="flex flex-wrap items-baseline gap-2">
@@ -259,7 +292,7 @@ export function ScreenerClient() {
       )}
 
       {/* النتائج */}
-      {loading ? (
+      {tab === "history" ? null : loading ? (
         <TableSkeleton />
       ) : error ? (
         <ErrorBox message={error} onRetry={() => setRefresh((n) => n + 1)} />
