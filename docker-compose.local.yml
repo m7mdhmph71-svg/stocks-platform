@@ -12,6 +12,8 @@ services:
       DATABASE_URL: postgresql://sahm:localdev@db:5432/sahm
       AUTH_SECRET: local-dev-secret-change-in-production-0123456789
       CRON_SECRET: local-dev-cron-secret
+      # التجربة المحلية عبر http — بدونها يرفض سفاري حفظ كوكي الجلسة
+      COOKIE_SECURE: "0"
     ports:
       # غيّر منفذ المضيف عند التعارض: APP_PORT=3005 docker compose ... up -d
       - "${APP_PORT:-3000}:3000"

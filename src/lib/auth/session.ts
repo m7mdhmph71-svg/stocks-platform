@@ -29,7 +29,12 @@ export async function createSession(userId: string): Promise<void> {
   const store = await cookies();
   store.set(COOKIE, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    // COOKIE_SECURE=0 للتجربة المحلية عبر http (سفاري يرفض كوكي Secure
+    // على localhost بلا تشفير، بخلاف كروم) — الافتراضي في الإنتاج: آمن
+    secure:
+      process.env.COOKIE_SECURE !== undefined
+        ? process.env.COOKIE_SECURE === "1"
+        : process.env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: MAX_AGE_S,
     path: "/",
