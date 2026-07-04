@@ -13,7 +13,8 @@ services:
       AUTH_SECRET: local-dev-secret-change-in-production-0123456789
       CRON_SECRET: local-dev-cron-secret
     ports:
-      - "3000:3000"
+      # غيّر منفذ المضيف عند التعارض: APP_PORT=3005 docker compose ... up -d
+      - "${APP_PORT:-3000}:3000"
     depends_on:
       migrate:
         condition: service_completed_successfully
