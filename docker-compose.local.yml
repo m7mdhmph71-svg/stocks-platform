@@ -1,0 +1,37 @@
+# تجربة محلية بأمر واحد — لا تحتاج أي ملف إعدادات:
+#   docker compose -f docker-compose.local.yml up -d --build
+# ثم افتح: http://localhost:3000  (الحسابات مفعّلة بقاعدة بيانات محلية)
+# الإيقاف:  docker compose -f docker-compose.local.yml down
+# الإيقاف مع حذف البيانات:  docker compose -f docker-compose.local.yml down -v
+
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://sahm:localdev@db:5432/sahm
+      AUTH_SECRET: local-dev-secret-change-in-production-0123456789
+      CRON_SECRET: local-dev-cron-secret
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sahm
+      POSTGRES_PASSWORD: localdev
+      POSTGRES_DB: sahm
+    volumes:
+      - pgdata_local:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sahm -d sahm"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata_local:
