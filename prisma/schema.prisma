@@ -1,0 +1,68 @@
+// مخطط قاعدة البيانات — حسابات المستخدمين وقوائم المتابعة وسجل الصفقات.
+// PostgreSQL عبر DATABASE_URL. عند غيابه تعمل المنصة بوضع «بلا حسابات».
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Plan {
+  FREE
+  PRO
+}
+
+enum TradeStatus {
+  OPEN
+  TARGET
+  STOP
+  CLOSED
+}
+
+model User {
+  id           String      @id @default(cuid())
+  email        String      @unique
+  passwordHash String
+  name         String?
+  plan         Plan        @default(FREE)
+  planExpires  DateTime?
+  createdAt    DateTime    @default(now())
+  watchlist    WatchItem[]
+  trades       Trade[]
+}
+
+model WatchItem {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ticker      String
+  addedAt     DateTime  @default(now())
+  /// آخر حكم شرعي مرصود — لكشف تغيّر الحكم لاحقاً
+  lastVerdict String?
+  lastChecked DateTime?
+
+  @@unique([userId, ticker])
+  @@index([userId])
+}
+
+model Trade {
+  id         String      @id @default(cuid())
+  userId     String
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ticker     String
+  strategy   String
+  entryPrice Float
+  target     Float
+  stop       Float
+  qty        Float?
+  status     TradeStatus @default(OPEN)
+  openedAt   DateTime    @default(now())
+  closedAt   DateTime?
+  exitPrice  Float?
+  notes      String?
+
+  @@index([userId, status])
+}

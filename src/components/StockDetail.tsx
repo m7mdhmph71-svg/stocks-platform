@@ -9,6 +9,7 @@ import {
 } from "@/lib/format";
 import { fetchJson, fmtDateTimeAr } from "@/components/ui";
 import { SourceBanner } from "@/components/SourceBanner";
+import { WatchTradeActions } from "@/components/WatchTradeActions";
 import { ShariahBadge } from "@/components/ShariahBadge";
 import { ShariahCard } from "@/components/ShariahCard";
 import { PurificationCalc } from "@/components/PurificationCalc";
@@ -97,6 +98,13 @@ export function StockDetail({ ticker }: { ticker: string }) {
               {row.industry ? (
                 <span className="chip">{row.industry}</span>
               ) : null}
+            </div>
+            <div className="mt-4">
+              <WatchTradeActions
+                ticker={row.ticker}
+                price={row.price}
+                targets={selected}
+              />
             </div>
           </div>
           <div className="text-end">

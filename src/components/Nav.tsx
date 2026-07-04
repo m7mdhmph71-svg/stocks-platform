@@ -3,14 +3,29 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SearchBox } from "@/components/SearchBox";
+import { useSession } from "@/components/useSession";
 
-const links = [
+const baseLinks = [
   { href: "/", label: "الرئيسية" },
   { href: "/screener", label: "الفرز" },
-] as const;
+];
+
+const memberLinks = [
+  { href: "/watchlist", label: "قائمتي" },
+  { href: "/trades", label: "صفقاتي" },
+];
 
 export function Nav() {
   const pathname = usePathname();
+  const session = useSession();
+
+  const links = [
+    ...baseLinks,
+    ...(session.enabled && session.user ? memberLinks : []),
+    ...(session.enabled
+      ? [{ href: "/account", label: session.user ? "حسابي" : "دخول" }]
+      : []),
+  ];
 
   return (
     <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/85 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/85">

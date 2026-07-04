@@ -1,0 +1,5 @@
+# Caddy: شهادة TLS تلقائية من Let's Encrypt للنطاق المضبوط في DOMAIN
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy app:3000
+}
