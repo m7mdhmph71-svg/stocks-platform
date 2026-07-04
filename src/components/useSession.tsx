@@ -1,8 +1,17 @@
 "use client";
 
-// خطاف الجلسة: حالة الحسابات (مفعّلة؟) والمستخدم الحالي — يُستهلك في الواجهة
+// حالة الجلسة المشتركة لكل التطبيق: مزوّد واحد في layout يغذي كل
+// المكونات (الشريط، الحساب، القوائم…) — تسجيل الدخول/الخروج في أي
+// مكان يحدّث الجميع فوراً عبر refresh().
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 
 export interface SessionUser {
   email: string;
@@ -18,7 +27,14 @@ export interface SessionState {
   refresh: () => void;
 }
 
-export function useSession(): SessionState {
+const SessionContext = createContext<SessionState>({
+  loading: true,
+  enabled: false,
+  user: null,
+  refresh: () => {},
+});
+
+export function SessionProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [enabled, setEnabled] = useState(false);
   const [user, setUser] = useState<SessionUser | null>(null);
@@ -49,5 +65,14 @@ export function useSession(): SessionState {
   }, [tick]);
 
   const refresh = useCallback(() => setTick((n) => n + 1), []);
-  return { loading, enabled, user, refresh };
+
+  return (
+    <SessionContext.Provider value={{ loading, enabled, user, refresh }}>
+      {children}
+    </SessionContext.Provider>
+  );
+}
+
+export function useSession(): SessionState {
+  return useContext(SessionContext);
 }

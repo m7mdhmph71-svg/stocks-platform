@@ -3,6 +3,7 @@ import { Tajawal } from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { SessionProvider } from "@/components/useSession";
 
 const tajawal = Tajawal({
   weight: ["400", "500", "700"],
@@ -43,9 +44,11 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl" className={tajawal.variable}>
       <body className="flex min-h-screen flex-col font-sans">
-        <Nav />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <SessionProvider>
+          <Nav />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </SessionProvider>
       </body>
     </html>
   );
