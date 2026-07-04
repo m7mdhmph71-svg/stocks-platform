@@ -123,13 +123,14 @@ export function StockDetail({ ticker }: { ticker: string }) {
         </div>
       </header>
 
-      {/* الشرعية والأهداف */}
-      <div className="grid items-start gap-6 lg:grid-cols-2">
-        <div className="space-y-6">
+      {/* الشرعية والأهداف — grid-cols-1 صراحةً كي يُحدّ العمود بـ minmax(0,1fr)
+          فلا يوسّعه نص غير قابل للكسر (truncate) في الجوال */}
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+        <div className="min-w-0 space-y-6">
           <ShariahCard shariah={row.shariah} />
           <PurificationCalc shariah={row.shariah} />
         </div>
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <TargetsCard
             byStrategy={targetsByStrategy}
             selected={strategy}

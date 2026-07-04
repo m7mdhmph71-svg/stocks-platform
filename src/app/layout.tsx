@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Tajawal } from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
@@ -18,6 +18,23 @@ export const metadata: Metadata = {
   },
   description:
     "منصة فحص أسهم أمريكية بالعربية: الفحص الشرعي ونسبة التطهير، فلاتر المضاربة والزخم والاستثمار، والأهداف والتوقعات الفنية.",
+  appleWebApp: {
+    capable: true,
+    title: "سهم سكرينر",
+    statusBarStyle: "default",
+  },
+  icons: {
+    apple: "/icons/apple-touch-icon.png",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#15855c" },
+    { media: "(prefers-color-scheme: dark)", color: "#0e4534" },
+  ],
 };
 
 export default function RootLayout({
