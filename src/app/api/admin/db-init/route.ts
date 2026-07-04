@@ -31,10 +31,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ ok: true, already: true });
     }
 
-    // طبّق عبارات الإنشاء واحدة تلو الأخرى
+    // طبّق عبارات الإنشاء واحدة تلو الأخرى (مع تجريد أسطر التعليقات
+    // من داخل كل عبارة — كل مقطع يبدأ بسطر تعليق من مولّد Prisma)
     const statements = INIT_SQL.split(/;\s*\n/)
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0 && !s.startsWith("--"));
+      .map((s) =>
+        s
+          .split("\n")
+          .filter((line) => !line.trim().startsWith("--"))
+          .join("\n")
+          .trim()
+      )
+      .filter((s) => s.length > 0);
     for (const stmt of statements) {
       await db().$executeRawUnsafe(stmt);
     }
