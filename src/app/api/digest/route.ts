@@ -43,6 +43,17 @@ export async function GET(request: NextRequest) {
   }
 
   const dry = request.nextUrl.searchParams.get("dry") === "1";
+
+  // لا مزوّد واتساب مضبوطاً والطلب ليس معاينة → تخطٍّ هادئ بلا عمل ولا أخطاء
+  // (المنصة تعمل مستقلة بالكامل؛ الإرسال الآلي ميزة اختيارية خاملة)
+  if (!dry && whatsappProvider() === null) {
+    return NextResponse.json({
+      ok: true,
+      skipped: true,
+      detail: "لم يُفعَّل الإرسال الآلي — المنصة تعمل كاملة بدونه.",
+    });
+  }
+
   const origin = request.nextUrl.origin;
 
   const [momentum, liquidity] = await Promise.all([
