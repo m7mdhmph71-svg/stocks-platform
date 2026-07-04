@@ -17,10 +17,22 @@ services:
       WHATSAPP_PHONE_ID: ${WHATSAPP_PHONE_ID:-}
       WHATSAPP_TO: ${WHATSAPP_TO:-}
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     expose:
       - "3000"
+
+  # يهيّئ جداول قاعدة البيانات مرة واحدة قبل إقلاع التطبيق
+  migrate:
+    build:
+      context: .
+      target: migrate
+    restart: "no"
+    environment:
+      DATABASE_URL: postgresql://sahm:${POSTGRES_PASSWORD}@db:5432/sahm
+    depends_on:
+      db:
+        condition: service_healthy
 
   db:
     image: postgres:16-alpine
