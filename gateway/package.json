@@ -1,0 +1,16 @@
+{
+  "name": "sahm-whatsapp-gateway",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "بوابة واتساب بربط QR — ترسل ملخص إشارات سهم سكرينر اليومي إلى حسابك",
+  "scripts": {
+    "start": "node index.mjs",
+    "send-now": "node index.mjs --send-now"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.9",
+    "pino": "^9.5.0",
+    "qrcode": "^1.5.4"
+  }
+}
