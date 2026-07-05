@@ -7,6 +7,7 @@ import { computeTechnicals } from "@/lib/targets/technicals";
 import { computeTargets } from "@/lib/targets/engine";
 import { screenShariah } from "@/lib/shariah/screen";
 import { StockRow, TargetsResult } from "@/lib/types";
+import { saudiNameAr } from "@/lib/saudi/companies";
 import {
   buildHelpReply,
   buildStockReply,
@@ -91,7 +92,7 @@ async function stockReply(ticker: string): Promise<string> {
 
   const row: StockRow = {
     ticker,
-    name: quote?.name ?? ticker,
+    name: saudiNameAr(ticker) ?? quote?.name ?? ticker,
     exchange: null,
     sector: fund?.sector ?? null,
     industry: fund?.industry ?? null,

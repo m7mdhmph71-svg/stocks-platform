@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cached } from "@/lib/cache";
+import { searchSaudi } from "@/lib/saudi/companies";
 
 export const dynamic = "force-dynamic";
 
-/** بحث الأسهم بالاسم أو الرمز — يغذي صندوق البحث بالاقتراحات */
+/** بحث الأسهم بالاسم أو الرمز — يغذي صندوق البحث بالاقتراحات.
+ * يدمج مصدرين: فهرس شركات تداول المحلي (يفهم العربية: «أرامكو»، «الراجحي»،
+ * والرموز الرقمية مثل 2222) وبحث ياهو العالمي. */
 
 export interface SearchResult {
   ticker: string;
@@ -61,10 +64,47 @@ async function searchYahoo(q: string): Promise<SearchResult[]> {
       isSaudi: ticker.toUpperCase().endsWith(".SR"),
     });
   }
-  // ترتيب الأسواق المدعومة أولاً: الأمريكية ثم السعودية ثم الباقي
+  return out;
+}
+
+/** هل الاستعلام عربي أو رمز تداول رقمي؟ عندها تتصدر نتائج السوق السعودي */
+function looksSaudiFirst(q: string): boolean {
+  return /[؀-ۿ]/.test(q) || /^\d{1,4}$/.test(q);
+}
+
+async function combinedSearch(q: string): Promise<SearchResult[]> {
+  // الفهرس المحلي لتداول (فوري، يفهم العربية)
+  const local: SearchResult[] = searchSaudi(q).map((c) => ({
+    ticker: c.code + ".SR",
+    name: c.nameAr,
+    exchange: "تداول",
+    isUS: false,
+    isSaudi: true,
+  }));
+
+  // ياهو العالمي — فشله لا يسقط البحث كله
+  let yahoo: SearchResult[] = [];
+  try {
+    yahoo = await searchYahoo(q);
+  } catch {
+    // نكتفي بالنتائج المحلية
+  }
+
+  // ترتيب ياهو: الأسواق المدعومة أولاً (الأمريكية ثم السعودية ثم الباقي)
   const rank = (r: SearchResult) => (r.isUS ? 2 : r.isSaudi ? 1 : 0);
-  out.sort((a, b) => rank(b) - rank(a));
-  return out.slice(0, 8);
+  yahoo.sort((a, b) => rank(b) - rank(a));
+
+  // الدمج مع إزالة التكرار: بالعربية/الأرقام تتصدر تداول، وإلا ياهو أولاً
+  const first = looksSaudiFirst(q) ? local : yahoo;
+  const second = looksSaudiFirst(q) ? yahoo : local;
+  const seen = new Set<string>();
+  const merged: SearchResult[] = [];
+  for (const r of [...first, ...second]) {
+    if (seen.has(r.ticker)) continue;
+    seen.add(r.ticker);
+    merged.push(r);
+  }
+  return merged.slice(0, 8);
 }
 
 export async function GET(request: NextRequest) {
@@ -76,7 +116,7 @@ export async function GET(request: NextRequest) {
     const results = await cached(
       `search:${q.toLowerCase()}`,
       10 * 60_000,
-      () => searchYahoo(q)
+      () => combinedSearch(q)
     );
     return NextResponse.json({ results });
   } catch (e) {

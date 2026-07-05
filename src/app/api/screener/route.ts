@@ -8,6 +8,7 @@ import {
 } from "@/lib/types";
 import { PRESETS } from "@/lib/filters/presets";
 import { SAUDI_PRESET } from "@/lib/filters/saudi";
+import { saudiNameAr } from "@/lib/saudi/companies";
 import { applyConditions, parseConditions } from "@/lib/filters/engine";
 import {
   passesLongtermFundamentals,
@@ -231,6 +232,13 @@ async function screenLive(
     coarse.grossMarginMinPct = 0;
   }
   let candidates = await runYahooScreener(coarse);
+  if (preset === "saudi") {
+    // الاسم العربي من فهرس تداول متى توفر
+    candidates = candidates.map((r) => ({
+      ...r,
+      name: saudiNameAr(r.ticker) ?? r.name,
+    }));
+  }
 
   if (preset === "longterm") {
     // فلتر الاستثمار: بوابة أساسية ثم فنية

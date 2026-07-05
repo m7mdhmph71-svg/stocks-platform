@@ -19,6 +19,7 @@ import {
   isDemoTicker,
 } from "@/lib/demo/dataset";
 import { cached } from "@/lib/cache";
+import { saudiNameAr } from "@/lib/saudi/companies";
 
 export const dynamic = "force-dynamic";
 
@@ -162,7 +163,7 @@ export async function GET(
 
     const row: StockRow = {
       ticker,
-      name: meta?.longName ?? meta?.shortName ?? ticker,
+      name: saudiNameAr(ticker) ?? meta?.longName ?? meta?.shortName ?? ticker,
       exchange: meta?.fullExchangeName ?? meta?.exchangeName ?? null,
       sector: fund?.sector ?? null,
       industry: fund?.industry ?? null,

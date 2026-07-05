@@ -6,6 +6,7 @@ import { screenShariah } from "@/lib/shariah/screen";
 import { yahooJson } from "@/lib/yahoo/client";
 import { cached } from "@/lib/cache";
 import { demoRows, isDemoTicker, demoFundamentals } from "@/lib/demo/dataset";
+import { saudiNameAr } from "@/lib/saudi/companies";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -112,7 +113,7 @@ export async function GET() {
 
     rows.push({
       ticker: item.ticker,
-      name: q?.shortName ?? q?.longName ?? item.ticker,
+      name: saudiNameAr(item.ticker) ?? q?.shortName ?? q?.longName ?? item.ticker,
       addedAt: item.addedAt.toISOString(),
       price: q?.regularMarketPrice ?? null,
       changePercent: q?.regularMarketChangePercent ?? null,

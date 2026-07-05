@@ -21,7 +21,7 @@ export default function HomePage() {
           <h1 className="mx-auto max-w-3xl text-4xl font-bold leading-tight tracking-tight text-zinc-900 sm:text-5xl dark:text-zinc-50">
             سهم سكرينر
             <span className="mt-3 block bg-gradient-to-l from-brand-600 to-emerald-500 bg-clip-text text-2xl text-transparent sm:text-3xl">
-              منصة الفرز الشرعي والفني للأسهم الأمريكية
+              منصة الفرز الشرعي والفني للأسهم الأمريكية والسعودية
             </span>
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-zinc-600 dark:text-zinc-300">
