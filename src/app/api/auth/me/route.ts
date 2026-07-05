@@ -15,7 +15,13 @@ export async function GET() {
   }
   const user = await db().user.findUnique({
     where: { id: userId },
-    select: { email: true, name: true, plan: true, createdAt: true },
+    select: {
+      email: true,
+      name: true,
+      plan: true,
+      createdAt: true,
+      emailVerified: true,
+    },
   });
   return NextResponse.json({ enabled: true, user });
 }

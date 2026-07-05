@@ -17,6 +17,8 @@ export interface SessionUser {
   email: string;
   name: string | null;
   plan: "FREE" | "PRO";
+  /** تاريخ توثيق البريد (ISO) — null أو غائب = غير موثق */
+  emailVerified?: string | null;
 }
 
 export interface SessionState {

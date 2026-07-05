@@ -23,17 +23,36 @@ enum TradeStatus {
 }
 
 model User {
-  id           String      @id @default(cuid())
-  email        String      @unique
-  passwordHash String
-  name         String?
-  plan         Plan        @default(FREE)
-  planExpires  DateTime?
-  createdAt    DateTime    @default(now())
-  watchlist    WatchItem[]
-  trades       Trade[]
-  notifyPref   NotifyPref?
-  sentAlerts   SentAlert[]
+  id            String      @id @default(cuid())
+  email         String      @unique
+  passwordHash  String
+  name          String?
+  plan          Plan        @default(FREE)
+  planExpires   DateTime?
+  /// تاريخ توثيق البريد (null = غير موثق — لا يمنع الاستخدام حالياً)
+  emailVerified DateTime?
+  createdAt     DateTime    @default(now())
+  watchlist     WatchItem[]
+  trades        Trade[]
+  notifyPref    NotifyPref?
+  sentAlerts    SentAlert[]
+  authTokens    AuthToken[]
+}
+
+/// رموز الاستخدام الواحد: استرجاع كلمة المرور (RESET) وتوثيق البريد (VERIFY).
+/// يُخزَّن هاش الرمز لا الرمز نفسه، مع صلاحية وعدّاد محاولات.
+model AuthToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  attempts  Int       @default(0)
+  createdAt DateTime  @default(now())
+
+  @@index([userId, kind])
 }
 
 /// تفضيلات تنبيهات واتساب لكل مستخدم — يقرؤها مسار /api/alerts

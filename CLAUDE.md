@@ -52,13 +52,18 @@ npx prisma generate  # يعمل تلقائياً postinstall
   candles (شموع بكل الفترات لصفحة السهم)، digest (ملخص واتساب اليومي)،
   alerts (محرك التنبيهات اللحظية — تسحبه البوابة، منع التكرار عبر SentAlert)،
   whatsapp/{gateway,prefs,command} (وسيط ربط QR من المنصة، تفضيلات التنبيهات،
-  الأوامر التفاعلية)، auth/*، watchlist، trades،
+  الأوامر التفاعلية)، auth/* (دخول/تسجيل بحد محاولات في الذاكرة +
+  forgot/reset برمز 6 أرقام عبر البريد أو واتساب + verify لتوثيق البريد
+  — البريد عبر Resend بلا تبعيات: src/lib/mail.ts)، watchlist، trades،
+  purification،
   admin/db-init (تهيئة الجداول للنشرات بلا خدمة ترحيل، محمي بـ CRON_SECRET،
   قابل لإعادة التشغيل — يتخطى الموجود وينفّذ UPGRADE_SQL دائماً).
-- `prisma/schema.prisma` — User (خطة FREE/PRO)، WatchItem (يرصد تغيّر
-  الحكم الشرعي + alertVerdict خط أساس التنبيهات)، Trade (سجل صفقات
-  بهدف/وقف)، NotifyPref (تفضيلات التنبيهات لكل مستخدم)، SentAlert
-  (مفتاح فريد يمنع تكرار التنبيه).
+- `prisma/schema.prisma` — User (خطة FREE/PRO + emailVerified)، WatchItem
+  (يرصد تغيّر الحكم الشرعي + alertVerdict خط أساس التنبيهات)، Trade (سجل
+  صفقات بهدف/وقف)، NotifyPref (تفضيلات التنبيهات لكل مستخدم)، SentAlert
+  (مفتاح فريد يمنع تكرار التنبيه)، AuthToken (رموز استرجاع/توثيق مهشّرة
+  بمحاولات وصلاحية). ملاحظة: تغيير كلمة المرور لا يبطل جلسات JWT القائمة
+  (30 يوماً) — يُعالج عند مرحلة الدفع بإصدار جلسات قابلة للإبطال.
 - `gateway/` — بوابة واتساب اختيارية بربط QR (Baileys) تعمل على جهاز
   المستخدم: ملخص يومي مجدول، سحب /api/alerts دورياً، رد على الأوامر
   الواردة عبر /api/whatsapp/command، وواجهة JSON محمية بالسر تخدم

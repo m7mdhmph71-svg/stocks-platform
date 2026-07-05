@@ -2,8 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db, dbEnabled } from "@/lib/db";
 import { createSession } from "@/lib/auth/session";
+import { clientIp, recordAttempt, tooMany } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
+
+/** المحاولات الفاشلة المسموحة قبل الإيقاف المؤقت */
+const MAX_FAILS = 5;
+const FAIL_WINDOW_MS = 15 * 60_000;
 
 export async function POST(request: NextRequest) {
   if (!dbEnabled()) {
@@ -21,14 +26,26 @@ export async function POST(request: NextRequest) {
 
   const email = (body.email ?? "").trim().toLowerCase();
   const password = body.password ?? "";
+
+  // إيقاف مؤقت بعد محاولات فاشلة متكررة (لكل عنوان+بريد)
+  const rlKey = `login:${clientIp(request.headers)}:${email}`;
+  if (tooMany(rlKey, MAX_FAILS, FAIL_WINDOW_MS)) {
+    return NextResponse.json(
+      { error: "محاولات كثيرة — انتظر ربع ساعة أو استخدم «نسيت كلمة المرور»." },
+      { status: 429 }
+    );
+  }
+
   const user = await db().user.findUnique({ where: { email } });
 
   // رسالة واحدة للحالتين — لا نكشف وجود البريد من عدمه
-  const fail = () =>
-    NextResponse.json(
+  const fail = () => {
+    recordAttempt(rlKey, FAIL_WINDOW_MS);
+    return NextResponse.json(
       { error: "بيانات الدخول غير صحيحة." },
       { status: 401 }
     );
+  };
 
   if (!user) return fail();
   const ok = await bcrypt.compare(password, user.passwordHash);

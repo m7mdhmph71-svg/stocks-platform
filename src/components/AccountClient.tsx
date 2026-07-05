@@ -25,6 +25,49 @@ async function postJson(
   }
 }
 
+/** زر إرسال رابط توثيق البريد — يظهر فقط لغير الموثقين */
+function VerifyEmailAction() {
+  const [state, setState] = useState<"idle" | "busy" | "sent" | "error">("idle");
+  const [msg, setMsg] = useState<string | null>(null);
+
+  async function send() {
+    setState("busy");
+    const r = await postJson("/api/auth/verify", {});
+    if (r.ok) {
+      setState("sent");
+    } else {
+      setState("error");
+      setMsg(r.error ?? "تعذّر الإرسال.");
+    }
+  }
+
+  if (state === "sent") {
+    return (
+      <span className="text-xs text-emerald-700 dark:text-emerald-400">
+        أُرسل الرابط — تفقد بريدك
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-700 dark:bg-amber-950/60 dark:text-amber-300">
+        غير موثق
+      </span>
+      <button
+        type="button"
+        onClick={send}
+        disabled={state === "busy"}
+        className="text-xs text-brand-700 underline disabled:opacity-50 dark:text-brand-400"
+      >
+        {state === "busy" ? "جارٍ الإرسال…" : "أرسل رابط التوثيق"}
+      </button>
+      {state === "error" && msg ? (
+        <span className="text-xs text-red-600 dark:text-red-400">{msg}</span>
+      ) : null}
+    </span>
+  );
+}
+
 export function AccountClient() {
   const session = useSession();
   const router = useRouter();
@@ -104,6 +147,18 @@ export function AccountClient() {
               <dt className="text-zinc-500 dark:text-zinc-400">البريد</dt>
               <dd className="font-medium text-zinc-900 dark:text-zinc-50" dir="ltr">
                 {session.user.email}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-zinc-500 dark:text-zinc-400">توثيق البريد</dt>
+              <dd>
+                {session.user.emailVerified ? (
+                  <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
+                    موثق ✓
+                  </span>
+                ) : (
+                  <VerifyEmailAction />
+                )}
               </dd>
             </div>
             <div className="flex justify-between gap-4">
@@ -212,6 +267,17 @@ export function AccountClient() {
               autoComplete={mode === "login" ? "current-password" : "new-password"}
             />
           </label>
+
+          {mode === "login" ? (
+            <p className="text-end text-xs">
+              <Link
+                href="/reset"
+                className="text-zinc-500 underline hover:text-brand-700 dark:text-zinc-400"
+              >
+                نسيت كلمة المرور؟
+              </Link>
+            </p>
+          ) : null}
 
           {error ? (
             <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950/50 dark:text-red-300">

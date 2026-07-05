@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db, dbEnabled } from "@/lib/db";
 import { createSession } from "@/lib/auth/session";
+import { clientIp, rateLimit } from "@/lib/rateLimit";
+import { sendVerificationEmail } from "@/lib/auth/sendVerification";
+import { mailEnabled } from "@/lib/mail";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +15,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { error: "الحسابات غير مفعّلة على هذا النشر." },
       { status: 503 }
+    );
+  }
+  // حد إنشاء الحسابات لكل عنوان — يصد التسجيل الآلي
+  if (!rateLimit(`register:${clientIp(request.headers)}`, 5, 60 * 60_000)) {
+    return NextResponse.json(
+      { error: "محاولات كثيرة — انتظر قليلاً ثم أعد المحاولة." },
+      { status: 429 }
     );
   }
   let body: { email?: string; password?: string; name?: string };
@@ -47,6 +57,14 @@ export async function POST(request: NextRequest) {
     data: { email, passwordHash: await bcrypt.hash(password, 10), name },
   });
   await createSession(user.id);
+
+  // رابط توثيق البريد (عند ضبط الإرسال) — فشله لا يعطل التسجيل
+  if (mailEnabled()) {
+    sendVerificationEmail(user.id, user.email, user.name, request.nextUrl.origin).catch(
+      (e) => console.error("register verify mail failed:", e)
+    );
+  }
+
   return NextResponse.json({
     ok: true,
     user: { email: user.email, name: user.name, plan: user.plan },
