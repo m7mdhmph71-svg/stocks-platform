@@ -52,6 +52,15 @@ if (!CRON_SECRET) {
   console.error("⚠️  ضع CRON_SECRET في ملف gateway/.env (انسخ .env.example إلى .env)");
 }
 
+// شبكة أمان: مكتبة Baileys تسرّب أحياناً وعوداً مرفوضة (مهلات داخلية أثناء
+// إعادة الاتصال عند تقلب الشبكة) — بدون هذا تسقط العملية كلها بخطأ واحد عابر.
+process.on("unhandledRejection", (reason) => {
+  log(`⚠️ رفض وعد غير معالج (تمت مواصلة العمل): ${reason?.message ?? reason}`);
+});
+process.on("uncaughtException", (err) => {
+  log(`⚠️ استثناء غير ملتقط (تمت مواصلة العمل): ${err?.message ?? err}`);
+});
+
 // ---------- حالة البوابة ----------
 let sock = null;
 let connected = false;
