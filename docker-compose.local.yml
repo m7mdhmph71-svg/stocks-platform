@@ -14,6 +14,12 @@ services:
       CRON_SECRET: local-dev-cron-secret
       # التجربة المحلية عبر http — بدونها يرفض سفاري حفظ كوكي الجلسة
       COOKIE_SECURE: "0"
+      # بوابة واتساب تعمل على جهازك خارج الحاويات (cd gateway && npm start)
+      # — host.docker.internal يشير من الحاوية إلى الجهاز المضيف
+      GATEWAY_URL: http://host.docker.internal:8899
+    extra_hosts:
+      # يجعل host.docker.internal يعمل على لينكس أيضاً (على ماك/ويندوز مدمج)
+      - "host.docker.internal:host-gateway"
     ports:
       # غيّر منفذ المضيف عند التعارض: APP_PORT=3005 docker compose ... up -d
       - "${APP_PORT:-3000}:3000"

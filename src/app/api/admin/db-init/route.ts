@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, dbEnabled } from "@/lib/db";
-import { INIT_SQL } from "@/lib/dbInit";
+import { INIT_SQL, UPGRADE_SQL } from "@/lib/dbInit";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -23,16 +23,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // إن كان جدول المستخدمين موجوداً فالمخطط مُهيأ سلفاً
-    const existing = await db().$queryRawUnsafe<Array<{ t: string | null }>>(
-      `SELECT to_regclass('public."User"')::text AS t`
-    );
-    if (existing[0]?.t) {
-      return NextResponse.json({ ok: true, already: true });
-    }
-
     // طبّق عبارات الإنشاء واحدة تلو الأخرى (مع تجريد أسطر التعليقات
-    // من داخل كل عبارة — كل مقطع يبدأ بسطر تعليق من مولّد Prisma)
+    // من داخل كل عبارة — كل مقطع يبدأ بسطر تعليق من مولّد Prisma).
+    // ما هو موجود سلفاً يُتخطى — فيمكن إعادة الاستدعاء بعد كل ترقية مخطط
+    // لإنشاء الجداول الجديدة فقط.
     const statements = INIT_SQL.split(/;\s*\n/)
       .map((s) =>
         s
@@ -42,10 +36,27 @@ export async function GET(request: NextRequest) {
           .trim()
       )
       .filter((s) => s.length > 0);
+    let applied = 0;
+    let skipped = 0;
     for (const stmt of statements) {
+      try {
+        await db().$executeRawUnsafe(stmt);
+        applied++;
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        // 42P07 جدول/فهرس موجود، 42710 نوع/قيد موجود، وصياغات "already exists"
+        if (/already exists|42P07|42710/i.test(msg)) {
+          skipped++;
+          continue;
+        }
+        throw e;
+      }
+    }
+    // ترقيات الأعمدة الإضافية — idempotent (IF NOT EXISTS) فتُنفَّذ دائماً
+    for (const stmt of UPGRADE_SQL) {
       await db().$executeRawUnsafe(stmt);
     }
-    return NextResponse.json({ ok: true, applied: statements.length });
+    return NextResponse.json({ ok: true, applied, skipped, already: applied === 0 });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error("db-init failed:", msg);

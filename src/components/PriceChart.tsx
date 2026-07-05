@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Candle } from "@/lib/types";
 import { fmtNum, fmtPrice } from "@/lib/format";
-import { fmtShortDateAr } from "@/components/ui";
+import { fmtMonthYearAr, fmtShortDateAr, fmtTimeAr } from "@/components/ui";
 
 export interface ChartLevel {
   price: number;
@@ -11,12 +11,18 @@ export interface ChartLevel {
   color: string; // hex آمن للوضعين
 }
 
+/** صيغة علامات المحور الأفقي: تاريخ (افتراضي)، وقت للفترات اللحظية، شهر/سنة للمدى الطويل */
+export type TickMode = "date" | "time" | "month";
+
 interface PriceChartProps {
   candles: Candle[];
   targets?: { label: string; price: number }[];
   stopLoss?: number | null;
   sma50?: number | null;
   sma200?: number | null;
+  tickMode?: TickMode;
+  /** عملة العرض في تلميح التحويم (افتراضياً دولار) */
+  currency?: string;
 }
 
 const W = 820;
@@ -37,8 +43,17 @@ export function PriceChart({
   stopLoss = null,
   sma50 = null,
   sma200 = null,
+  tickMode = "date",
+  currency = "$",
 }: PriceChartProps) {
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+
+  const tickLabel = (unixSeconds: number): string =>
+    tickMode === "time"
+      ? fmtTimeAr(unixSeconds)
+      : tickMode === "month"
+        ? fmtMonthYearAr(unixSeconds)
+        : fmtShortDateAr(unixSeconds);
 
   const model = useMemo(() => {
     if (candles.length < 2) return null;
@@ -200,7 +215,7 @@ export function PriceChart({
             textAnchor="middle"
             fill="currentColor"
           >
-            {fmtShortDateAr(candles[i].time)}
+            {tickLabel(candles[i].time)}
           </text>
         ))}
 
@@ -278,10 +293,12 @@ export function PriceChart({
           }}
         >
           <div className="font-bold tabular-nums text-zinc-900 dark:text-zinc-50">
-            {fmtPrice(hover.close)}
+            {fmtPrice(hover.close, currency)}
           </div>
           <div className="text-zinc-500 dark:text-zinc-400">
-            {fmtShortDateAr(hover.time)}
+            {tickMode === "time"
+              ? `${fmtShortDateAr(hover.time)} ${fmtTimeAr(hover.time)}`
+              : fmtShortDateAr(hover.time)}
           </div>
         </div>
       ) : null}

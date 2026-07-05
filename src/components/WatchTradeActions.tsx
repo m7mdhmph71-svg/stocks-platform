@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { TargetsResult } from "@/lib/types";
 import { useSession } from "@/components/useSession";
-import { fmtPrice } from "@/lib/format";
+import { currencyFor, fmtPrice } from "@/lib/format";
 
 export function WatchTradeActions({
   ticker,
@@ -140,9 +140,9 @@ export function WatchTradeActions({
       {openForm && canTrade ? (
         <div className="rounded-xl border border-zinc-200 bg-zinc-50/70 p-4 text-sm dark:border-zinc-800 dark:bg-zinc-800/40">
           <p className="text-zinc-600 dark:text-zinc-300">
-            توثيق صفقة «{targets.strategyAr}»: دخول {fmtPrice(price)} · هدف{" "}
-            <b className="text-emerald-700 dark:text-emerald-400">{fmtPrice(t1)}</b> · وقف{" "}
-            <b className="text-red-700 dark:text-red-400">{fmtPrice(stop)}</b>
+            توثيق صفقة «{targets.strategyAr}»: دخول {fmtPrice(price, currencyFor(ticker))} · هدف{" "}
+            <b className="text-emerald-700 dark:text-emerald-400">{fmtPrice(t1, currencyFor(ticker))}</b> · وقف{" "}
+            <b className="text-red-700 dark:text-red-400">{fmtPrice(stop, currencyFor(ticker))}</b>
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <input

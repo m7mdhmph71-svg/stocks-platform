@@ -8,6 +8,7 @@ import {
   fmtCompact,
   fmtNum,
   fmtPercent,
+  currencyFor,
   fmtPrice,
 } from "@/lib/format";
 import { ShariahBadge } from "@/components/ShariahBadge";
@@ -187,7 +188,7 @@ export function StockTable({ rows }: { rows: StockRow[] }) {
                   {row.name}
                 </td>
                 <td className="px-3 py-3 text-end font-medium tabular-nums">
-                  {fmtPrice(row.price)}
+                  {fmtPrice(row.price, currencyFor(row.ticker))}
                 </td>
                 <td
                   className={`px-3 py-3 text-end tabular-nums ${changeColorClass(
@@ -219,7 +220,7 @@ export function StockTable({ rows }: { rows: StockRow[] }) {
                 </td>
                 <td className="px-3 py-3 text-end tabular-nums text-zinc-700 dark:text-zinc-200">
                   {row.targets?.targets[0]
-                    ? fmtPrice(row.targets.targets[0].price)
+                    ? fmtPrice(row.targets.targets[0].price, currencyFor(row.ticker))
                     : "—"}
                 </td>
                 <td className="px-3 py-3 text-end">

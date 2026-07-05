@@ -96,12 +96,15 @@ function ScoreMeter({ score }: { score: number | null }) {
 
 export function TargetsCard({
   byStrategy,
+  currency = "$",
   selected,
   onSelect,
   analystTarget,
   analystRecommendation,
 }: {
   byStrategy: Record<StrategyKey, TargetsResult>;
+  /** عملة العرض (افتراضياً دولار) */
+  currency?: string;
   selected: StrategyKey;
   onSelect: (k: StrategyKey) => void;
   analystTarget: number | null;
@@ -160,7 +163,7 @@ export function TargetsCard({
             سعر الدخول المرجعي
           </dt>
           <dd className="mt-1 text-lg font-bold tabular-nums text-zinc-900 dark:text-zinc-50">
-            {fmtPrice(t.entry)}
+            {fmtPrice(t.entry, currency)}
           </dd>
         </div>
         <div className="rounded-xl border border-red-200 bg-red-50/70 p-3 dark:border-red-900/50 dark:bg-red-950/30">
@@ -168,7 +171,7 @@ export function TargetsCard({
             وقف الخسارة
           </dt>
           <dd className="mt-1 text-lg font-bold tabular-nums text-red-700 dark:text-red-300">
-            {fmtPrice(t.stopLoss)}
+            {fmtPrice(t.stopLoss, currency)}
           </dd>
           {t.stopLossBasisAr ? (
             <p className="mt-1 text-[11px] leading-4 text-red-700/70 dark:text-red-300/70">
@@ -203,7 +206,7 @@ export function TargetsCard({
                 </p>
               </div>
               <span className="shrink-0 text-base font-bold tabular-nums text-emerald-700 dark:text-emerald-300">
-                {fmtPrice(lvl.price)}
+                {fmtPrice(lvl.price, currency)}
               </span>
             </li>
           ))}
@@ -236,7 +239,7 @@ export function TargetsCard({
             ) : null}
           </span>
           <span className="font-bold tabular-nums text-sky-800 dark:text-sky-200">
-            {fmtPrice(analystTarget)}
+            {fmtPrice(analystTarget, currency)}
           </span>
         </div>
       ) : null}

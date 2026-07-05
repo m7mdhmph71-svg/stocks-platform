@@ -10,6 +10,7 @@ import {
   StrategyKey,
 } from "@/lib/types";
 import { PRESETS } from "@/lib/filters/presets";
+import { SAUDI_PRESET } from "@/lib/filters/saudi";
 import { saveSnapshot } from "@/lib/history";
 import { buildShareMessage } from "@/lib/whatsapp/format";
 import { fetchJson, fmtDateTimeAr } from "@/components/ui";
@@ -22,7 +23,7 @@ import { SourceBanner } from "@/components/SourceBanner";
 import { TableSkeleton } from "@/components/Skeletons";
 import { EmptyState, ErrorBox } from "@/components/States";
 
-type Tab = StrategyKey | "custom" | "history";
+type Tab = StrategyKey | "saudi" | "custom" | "history";
 
 const STRATEGY_KEYS: StrategyKey[] = ["liquidity", "momentum", "longterm"];
 
@@ -95,9 +96,11 @@ export function ScreenerClient() {
       ? "custom"
       : presetParam === "history"
         ? "history"
-        : STRATEGY_KEYS.includes(presetParam as StrategyKey)
-          ? (presetParam as StrategyKey)
-          : "liquidity";
+        : presetParam === "saudi"
+          ? "saudi"
+          : STRATEGY_KEYS.includes(presetParam as StrategyKey)
+            ? (presetParam as StrategyKey)
+            : "liquidity";
 
   const customConditions = useMemo(
     () => parseConditionsParam(conditionsParam),
@@ -139,9 +142,11 @@ export function ScreenerClient() {
           const nameAr =
             tab === "custom"
               ? "فلتر مخصص"
-              : tab !== "history"
-                ? PRESETS[tab].nameAr
-                : "";
+              : tab === "saudi"
+                ? SAUDI_PRESET.nameAr
+                : tab !== "history"
+                  ? PRESETS[tab].nameAr
+                  : "";
           if (nameAr) saveSnapshot(tab, nameAr, res);
         }
       })
@@ -184,7 +189,11 @@ export function ScreenerClient() {
   );
 
   const preset =
-    tab !== "custom" && tab !== "history" ? PRESETS[tab] : null;
+    tab !== "custom" && tab !== "history" && tab !== "saudi"
+      ? PRESETS[tab]
+      : null;
+  /** بطاقة الوصف: الاستراتيجيات من PRESETS والسعودي من إعداده المستقل */
+  const info = tab === "saudi" ? SAUDI_PRESET : preset;
 
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-8 sm:px-6">
@@ -221,6 +230,20 @@ export function ScreenerClient() {
             {PRESETS[k].nameAr}
           </button>
         ))}
+        <button
+          role="tab"
+          aria-selected={tab === "saudi"}
+          type="button"
+          onClick={() => switchTab("saudi")}
+          className={
+            "rounded-full px-4 py-2 text-sm font-medium transition-colors " +
+            (tab === "saudi"
+              ? "bg-brand-600 text-white shadow-sm"
+              : "border border-zinc-300 bg-white text-zinc-600 hover:border-brand-400 hover:text-brand-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:text-brand-400")
+          }
+        >
+          {SAUDI_PRESET.nameAr}
+        </button>
         <button
           role="tab"
           aria-selected={tab === "custom"}
@@ -265,23 +288,23 @@ export function ScreenerClient() {
       ) : null}
 
       {/* وصف الاستراتيجية + اللوحة التوضيحية */}
-      {tab === "history" ? null : preset ? (
+      {tab === "history" ? null : info ? (
         <>
           <div className="card p-4 sm:p-5">
             <div className="flex flex-wrap items-baseline gap-2">
               <h2 className="font-bold text-zinc-900 dark:text-zinc-50">
-                {preset.nameAr}
+                {info.nameAr}
               </h2>
               <span className="text-sm text-brand-600 dark:text-brand-400">
-                {preset.taglineAr}
+                {info.taglineAr}
               </span>
             </div>
             <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
-              {preset.descriptionAr}
+              {info.descriptionAr}
             </p>
-            {preset.advancedNotesAr.length > 0 ? (
+            {info.advancedNotesAr.length > 0 ? (
               <ul className="mt-3 space-y-1">
-                {preset.advancedNotesAr.map((n, i) => (
+                {info.advancedNotesAr.map((n, i) => (
                   <li
                     key={i}
                     className="flex gap-2 text-xs text-zinc-500 dark:text-zinc-400"
@@ -293,7 +316,8 @@ export function ScreenerClient() {
               </ul>
             ) : null}
           </div>
-          <LegendPanel preset={preset} />
+          {/* اللوحة التوضيحية لدلالات Finviz — للفلاتر الأمريكية فقط */}
+          {preset ? <LegendPanel preset={preset} /> : null}
         </>
       ) : (
         <FilterBuilder
@@ -330,7 +354,7 @@ export function ScreenerClient() {
                   "https://wa.me/?text=" +
                   encodeURIComponent(
                     buildShareMessage(
-                      preset ? preset.nameAr : "فلتر مخصص",
+                      info ? info.nameAr : "فلتر مخصص",
                       data.rows,
                       new Date()
                     )

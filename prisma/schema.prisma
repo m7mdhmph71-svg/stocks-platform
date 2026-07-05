@@ -32,6 +32,39 @@ model User {
   createdAt    DateTime    @default(now())
   watchlist    WatchItem[]
   trades       Trade[]
+  notifyPref   NotifyPref?
+  sentAlerts   SentAlert[]
+}
+
+/// تفضيلات تنبيهات واتساب لكل مستخدم — يقرؤها مسار /api/alerts
+model NotifyPref {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// رقم دولي بلا + لاستقبال التنبيهات وربط أوامر واتساب بالحساب.
+  /// null = تُرسل إلى حساب واتساب المرتبط نفسه (محادثة «أنا»)
+  whatsappPhone  String?
+  /// ظهور سهم من قائمة المتابعة في فلاتر اليوم
+  alertWatchlist Boolean  @default(true)
+  /// لمس صفقة مفتوحة للهدف أو اقترابها من الوقف
+  alertTrades    Boolean  @default(true)
+  /// تغيّر الحكم الشرعي لسهم في قائمة المتابعة
+  alertShariah   Boolean  @default(true)
+  /// تقرير أداء الصفقات الأسبوعي (السبت)
+  weeklyReport   Boolean  @default(true)
+  updatedAt      DateTime @updatedAt
+}
+
+/// تنبيه أُرسل فعلاً — المفتاح الفريد يمنع تكرار التنبيه نفسه
+model SentAlert {
+  id     String   @id @default(cuid())
+  userId String
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  key    String
+  sentAt DateTime @default(now())
+
+  @@unique([userId, key])
+  @@index([userId])
 }
 
 model WatchItem {
@@ -43,6 +76,8 @@ model WatchItem {
   /// آخر حكم شرعي مرصود — لكشف تغيّر الحكم لاحقاً
   lastVerdict String?
   lastChecked DateTime?
+  /// خط أساس تنبيهات واتساب — مستقل عن lastVerdict الذي تحدّثه الواجهة
+  alertVerdict String?
 
   @@unique([userId, ticker])
   @@index([userId])

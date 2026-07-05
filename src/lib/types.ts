@@ -207,8 +207,11 @@ export interface ScreenerPreset {
 
 export type DataSource = "yahoo" | "finviz" | "demo";
 
+/** مفاتيح تبويبات الفرز: الاستراتيجيات الثلاث + السوق السعودي + المخصص */
+export type ScreenerPresetKey = StrategyKey | "saudi" | "custom";
+
 export interface ScreenerResponse {
-  preset: StrategyKey | "custom";
+  preset: ScreenerPresetKey;
   source: DataSource;
   /** ISO timestamp */
   asOf: string;

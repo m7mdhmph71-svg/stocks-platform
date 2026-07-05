@@ -10,6 +10,8 @@ export interface SearchResult {
   name: string;
   exchange: string;
   isUS: boolean;
+  /** سهم سوق تداول السعودي (.SR) */
+  isSaudi: boolean;
 }
 
 const UA =
@@ -51,10 +53,17 @@ async function searchYahoo(q: string): Promise<SearchResult[]> {
       null;
     const exchange = typeof raw.exchDisp === "string" ? raw.exchDisp : "";
     if (!ticker || !name) continue;
-    out.push({ ticker, name, exchange, isUS: US_EXCHANGES.has(exchange) });
+    out.push({
+      ticker,
+      name,
+      exchange,
+      isUS: US_EXCHANGES.has(exchange),
+      isSaudi: ticker.toUpperCase().endsWith(".SR"),
+    });
   }
-  // الأمريكية أولاً (المنصة تفحص السوق الأمريكي) ثم الباقي
-  out.sort((a, b) => Number(b.isUS) - Number(a.isUS));
+  // ترتيب الأسواق المدعومة أولاً: الأمريكية ثم السعودية ثم الباقي
+  const rank = (r: SearchResult) => (r.isUS ? 2 : r.isSaudi ? 1 : 0);
+  out.sort((a, b) => rank(b) - rank(a));
   return out.slice(0, 8);
 }
 

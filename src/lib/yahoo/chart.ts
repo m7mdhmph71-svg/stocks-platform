@@ -1,13 +1,50 @@
-// بيانات الشموع اليومية من ياهو v8/finance/chart — بدون crumb.
+// بيانات الشموع من ياهو v8/finance/chart — بدون crumb.
 // عند أي فشل تعيد [] (التحليل الفني يتخطى السهم بدل إسقاط الطلب كله).
 
 import { Candle } from "@/lib/types";
 import { cached } from "@/lib/cache";
 import { yahooJson } from "@/lib/yahoo/client";
 
-export type ChartRange = "1mo" | "3mo" | "6mo" | "1y" | "2y";
+/** كل الفترات المدعومة في الرسم البياني (تطابق قيم range في واجهة ياهو) */
+export type ChartRange =
+  | "1d"
+  | "5d"
+  | "1mo"
+  | "3mo"
+  | "6mo"
+  | "ytd"
+  | "1y"
+  | "2y"
+  | "5y"
+  | "max";
 
-const TTL_MS = 15 * 60 * 1000; // كاش ١٥ دقيقة
+/** الفاصل الأنسب لكل فترة — يوازن دقة الرسم مع عدد النقاط */
+const RANGE_INTERVAL: Record<ChartRange, string> = {
+  "1d": "5m",
+  "5d": "30m",
+  "1mo": "1d",
+  "3mo": "1d",
+  "6mo": "1d",
+  ytd: "1d",
+  "1y": "1d",
+  "2y": "1d",
+  "5y": "1wk",
+  max: "1mo",
+};
+
+/** هل الفترة لحظية (شموع داخل الجلسة تُعرض بالساعة لا بالتاريخ)؟ */
+export function isIntradayRange(range: ChartRange): boolean {
+  return range === "1d" || range === "5d";
+}
+
+export function isChartRange(v: string): v is ChartRange {
+  return Object.prototype.hasOwnProperty.call(RANGE_INTERVAL, v);
+}
+
+/** كاش أقصر للفترات اللحظية (تتجدد أثناء الجلسة) */
+function ttlFor(range: ChartRange): number {
+  return isIntradayRange(range) ? 3 * 60 * 1000 : 15 * 60 * 1000;
+}
 
 interface ChartResponse {
   chart?: {
@@ -32,9 +69,10 @@ function fin(v: number | null | undefined): number | null {
 }
 
 async function fetchImpl(ticker: string, range: ChartRange): Promise<Candle[]> {
+  const interval = RANGE_INTERVAL[range];
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(
     ticker
-  )}?range=${range}&interval=1d`;
+  )}?range=${range}&interval=${interval}`;
   const res = await yahooJson<ChartResponse>(url); // لا يحتاج crumb
 
   const result = res.chart?.result?.[0];
@@ -79,15 +117,15 @@ async function fetchImpl(ticker: string, range: ChartRange): Promise<Candle[]> {
 }
 
 /**
- * شموع يومية مرتبة تصاعدياً زمنياً. كاش بمفتاح candles:{ticker}:{range}.
- * عند الفشل: [] — ولا يُخزَّن الفشل في الكاش.
+ * شموع مرتبة تصاعدياً زمنياً بالفاصل الأنسب للفترة.
+ * كاش بمفتاح candles:{ticker}:{range}. عند الفشل: [] — ولا يُخزَّن الفشل.
  */
 export async function fetchCandles(
   ticker: string,
   range: ChartRange = "1y"
 ): Promise<Candle[]> {
   try {
-    return await cached(`candles:${ticker}:${range}`, TTL_MS, () =>
+    return await cached(`candles:${ticker}:${range}`, ttlFor(range), () =>
       fetchImpl(ticker, range)
     );
   } catch {

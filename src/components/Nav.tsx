@@ -8,11 +8,13 @@ import { useSession } from "@/components/useSession";
 const baseLinks = [
   { href: "/", label: "الرئيسية" },
   { href: "/screener", label: "الفرز" },
+  { href: "/backtest", label: "الاختبار" },
 ];
 
 const memberLinks = [
   { href: "/watchlist", label: "قائمتي" },
   { href: "/trades", label: "صفقاتي" },
+  { href: "/whatsapp", label: "تنبيهاتي" },
 ];
 
 export function Nav() {
@@ -67,7 +69,7 @@ export function Nav() {
 
       {/* روابط الجوال */}
       <nav
-        className="flex items-center gap-1 border-t border-zinc-100 px-4 py-1.5 sm:hidden dark:border-zinc-900"
+        className="flex items-center gap-1 overflow-x-auto whitespace-nowrap border-t border-zinc-100 px-4 py-1.5 sm:hidden dark:border-zinc-900"
         aria-label="التنقل للجوال"
       >
         {links.map((l) => {

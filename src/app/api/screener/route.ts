@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   FilterCondition,
+  ScreenerPresetKey,
   ScreenerResponse,
   StockRow,
   StrategyKey,
 } from "@/lib/types";
 import { PRESETS } from "@/lib/filters/presets";
+import { SAUDI_PRESET } from "@/lib/filters/saudi";
 import { applyConditions, parseConditions } from "@/lib/filters/engine";
 import {
   passesLongtermFundamentals,
@@ -158,10 +160,21 @@ async function enrichTargets(
 }
 
 function demoResponse(
-  preset: StrategyKey | "custom",
+  preset: ScreenerPresetKey,
   conds: FilterCondition[],
   noteAr: string
 ): ScreenerResponse {
+  // لا بيانات تجريبية للسوق السعودي — استجابة فارغة مفسَّرة بدل أسهم أمريكية مضللة
+  if (preset === "saudi") {
+    return {
+      preset,
+      source: "demo",
+      asOf: new Date().toISOString(),
+      total: 0,
+      rows: [],
+      notesAr: [noteAr, "لا تتوفر بيانات تجريبية للسوق السعودي."],
+    };
+  }
   let rows =
     preset === "custom" ? demoRows("all") : demoRows(preset as StrategyKey);
   rows = applyConditions(rows, conds).map((r) => ({
@@ -182,13 +195,14 @@ function demoResponse(
 }
 
 async function screenLive(
-  preset: StrategyKey | "custom",
+  preset: ScreenerPresetKey,
   conds: FilterCondition[]
 ): Promise<ScreenerResponse> {
   const notesAr: string[] = [];
 
   // 1) Finviz Elite إن توفر التوكن — يطبّق فلاتر المستخدم حرفياً
-  if (preset !== "custom" && finvizAvailable()) {
+  //    (أمريكي فقط — لا يغطي تداول)
+  if (preset !== "custom" && preset !== "saudi" && finvizAvailable()) {
     const fv = await fetchFinvizRows(PRESETS[preset].finvizQuery);
     if (fv && fv.length > 0) {
       const { rows } = await enrichFundamentals(fv.slice(0, ENRICH_CAP));
@@ -206,6 +220,7 @@ async function screenLive(
 
   // 2) ياهو: فرز خشن (بترقيم صفحات لتغطية كل النتائج) ثم فلترة دقيقة محلياً
   const coarse = coarseFromConditions(conds);
+  if (preset === "saudi") coarse.region = "sa";
   if (preset === "longterm") {
     // تضييق خادمي بالشروط الأساسية القابلة للتفويض — يقلص الكون من آلاف
     // إلى بضع مئات، والبوابة المحلية (passesLongtermFundamentals) تبقى الحاسمة
@@ -341,8 +356,11 @@ async function screenLive(
     rows = applyConditions(rows, weekConds);
   }
 
-  // الأهداف ودرجة الفرصة للنتائج النهائية (المخصص يُقيَّم بمنطق السوينق)
-  rows = await enrichTargets(rows, preset === "custom" ? "momentum" : preset);
+  // الأهداف ودرجة الفرصة للنتائج النهائية (المخصص والسعودي بمنطق السوينق)
+  rows = await enrichTargets(
+    rows,
+    preset === "custom" || preset === "saudi" ? "momentum" : preset
+  );
   if (rows.length > TARGETS_CAP) {
     notesAr.push(`حُسبت الأهداف والدرجة لأعلى ${TARGETS_CAP} نتيجة.`);
   }
@@ -362,7 +380,7 @@ export async function GET(request: NextRequest) {
   const sp = request.nextUrl.searchParams;
   const presetParam = sp.get("preset") ?? "liquidity";
 
-  let preset: StrategyKey | "custom";
+  let preset: ScreenerPresetKey;
   let conds: FilterCondition[];
 
   if (presetParam === "custom") {
@@ -378,12 +396,15 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       );
     }
+  } else if (presetParam === "saudi") {
+    preset = "saudi";
+    conds = SAUDI_PRESET.conditions;
   } else if ((PRESET_KEYS as string[]).includes(presetParam)) {
     preset = presetParam as StrategyKey;
-    conds = PRESETS[preset].conditions;
+    conds = PRESETS[preset as StrategyKey].conditions;
   } else {
     return NextResponse.json(
-      { error: "فلتر غير معروف. الفلاتر المتاحة: liquidity, momentum, longterm, custom." },
+      { error: "فلتر غير معروف. الفلاتر المتاحة: liquidity, momentum, longterm, saudi, custom." },
       { status: 400 }
     );
   }

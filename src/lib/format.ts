@@ -12,9 +12,21 @@ export function fmtNum(n: number | null | undefined, digits = 2): string {
   });
 }
 
-export function fmtPrice(n: number | null | undefined): string {
+/** عملة العرض حسب سوق الرمز: تداول (.SR) بالريال، وسواه بالدولار */
+export function currencyFor(ticker: string | null | undefined): string {
+  return ticker && ticker.toUpperCase().endsWith(".SR") ? "ر.س" : "$";
+}
+
+export function fmtPrice(
+  n: number | null | undefined,
+  currency = "$"
+): string {
   if (n === null || n === undefined || !isFinite(n)) return "—";
-  return "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const num = n.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  return currency === "$" ? "$" + num : `${num} ${currency}`;
 }
 
 export function fmtPercent(n: number | null | undefined, digits = 2): string {

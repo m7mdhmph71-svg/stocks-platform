@@ -12,6 +12,8 @@ interface SearchResult {
   name: string;
   exchange: string;
   isUS: boolean;
+  /** سهم سوق تداول السعودي (.SR) */
+  isSaudi: boolean;
 }
 
 export function SearchBox({ variant }: { variant: "nav" | "hero" }) {
@@ -165,7 +167,11 @@ export function SearchBox({ variant }: { variant: "nav" | "hero" }) {
                   </span>
                   <span className="text-xs text-zinc-500 dark:text-zinc-400">
                     {r.exchange}
-                    {r.isUS ? "" : " · خارج السوق الأمريكي"}
+                    {r.isUS
+                      ? ""
+                      : r.isSaudi
+                        ? " · تداول السعودية"
+                        : " · سوق غير مدعوم"}
                   </span>
                 </span>
                 <span

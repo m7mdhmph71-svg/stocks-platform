@@ -129,6 +129,9 @@ export function AccountClient() {
             <Link href="/trades" className="btn-ghost px-5 py-2 text-sm">
               سجل صفقاتي
             </Link>
+            <Link href="/whatsapp" className="btn-ghost px-5 py-2 text-sm">
+              تنبيهات واتساب
+            </Link>
             <button
               type="button"
               onClick={logout}

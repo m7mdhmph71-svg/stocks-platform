@@ -1,9 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { StockDetailResponse, StrategyKey } from "@/lib/types";
+import { Candle, StockDetailResponse, StrategyKey } from "@/lib/types";
+import type { ChartRange } from "@/lib/yahoo/chart";
+import type { CandlesResponse } from "@/app/api/candles/route";
+import type { TickMode } from "@/components/PriceChart";
 import {
   changeColorClass,
+  currencyFor,
   fmtPercent,
   fmtPrice,
 } from "@/lib/format";
@@ -19,6 +23,26 @@ import { PriceChart } from "@/components/PriceChart";
 import { DetailSkeleton } from "@/components/Skeletons";
 import { ErrorBox } from "@/components/States";
 
+/** فترات الرسم البياني بترتيب العرض */
+const CHART_RANGES: Array<{ key: ChartRange; label: string }> = [
+  { key: "1d", label: "يوم" },
+  { key: "5d", label: "أسبوع" },
+  { key: "1mo", label: "شهر" },
+  { key: "3mo", label: "3 أشهر" },
+  { key: "6mo", label: "6 أشهر" },
+  { key: "ytd", label: "بداية العام" },
+  { key: "1y", label: "سنة" },
+  { key: "2y", label: "سنتان" },
+  { key: "5y", label: "5 سنوات" },
+  { key: "max", label: "الكل" },
+];
+
+function tickModeFor(range: ChartRange, intraday: boolean): TickMode {
+  if (intraday) return "time";
+  if (range === "5y" || range === "max") return "month";
+  return "date";
+}
+
 export function StockDetail({ ticker }: { ticker: string }) {
   const [data, setData] = useState<StockDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,10 +50,21 @@ export function StockDetail({ ticker }: { ticker: string }) {
   const [refresh, setRefresh] = useState(0);
   const [strategy, setStrategy] = useState<StrategyKey>("liquidity");
 
+  // الرسم البياني: «سنة» تأتي مع استجابة السهم، وبقية الفترات تُجلب عند الطلب
+  const [range, setRange] = useState<ChartRange>("1y");
+  const [rangeCandles, setRangeCandles] = useState<Candle[] | null>(null);
+  const [rangeIntraday, setRangeIntraday] = useState(false);
+  const [chartLoading, setChartLoading] = useState(false);
+  const [chartError, setChartError] = useState<string | null>(null);
+
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(null);
+    setRange("1y");
+    setRangeCandles(null);
+    setRangeIntraday(false);
+    setChartError(null);
     fetchJson<StockDetailResponse>(
       `/api/stock/${encodeURIComponent(ticker)}`
     )
@@ -52,6 +87,36 @@ export function StockDetail({ ticker }: { ticker: string }) {
 
   const retry = useCallback(() => setRefresh((n) => n + 1), []);
 
+  const switchRange = useCallback(
+    (next: ChartRange) => {
+      setRange(next);
+      setChartError(null);
+      if (next === "1y") {
+        // فترة «سنة» موجودة سلفاً في استجابة السهم — لا حاجة لطلب جديد
+        setRangeCandles(null);
+        setRangeIntraday(false);
+        return;
+      }
+      setChartLoading(true);
+      fetchJson<CandlesResponse>(
+        `/api/candles?ticker=${encodeURIComponent(ticker)}&range=${next}`
+      )
+        .then((res) => {
+          setRangeCandles(res.candles);
+          setRangeIntraday(res.intraday);
+        })
+        .catch((e: unknown) => {
+          setRangeCandles(null);
+          setRangeIntraday(false);
+          setChartError(
+            e instanceof Error ? e.message : "تعذّر جلب بيانات الفترة."
+          );
+        })
+        .finally(() => setChartLoading(false));
+    },
+    [ticker]
+  );
+
   if (loading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
@@ -73,6 +138,7 @@ export function StockDetail({ ticker }: { ticker: string }) {
 
   const { row, targetsByStrategy } = data;
   const selected = targetsByStrategy[strategy];
+  const currency = currencyFor(row.ticker);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
@@ -109,7 +175,7 @@ export function StockDetail({ ticker }: { ticker: string }) {
           </div>
           <div className="text-end">
             <p className="text-3xl font-bold tabular-nums text-zinc-900 dark:text-zinc-50">
-              {fmtPrice(row.price)}
+              {fmtPrice(row.price, currency)}
             </p>
             <p
               className={`mt-1 text-lg font-medium tabular-nums ${changeColorClass(
@@ -140,13 +206,14 @@ export function StockDetail({ ticker }: { ticker: string }) {
         </div>
         <div className="min-w-0 space-y-6">
           <TargetsCard
+            currency={currency}
             byStrategy={targetsByStrategy}
             selected={strategy}
             onSelect={setStrategy}
             analystTarget={data.analystTargetMean}
             analystRecommendation={data.analystRecommendation}
           />
-          <TechnicalsTable indicators={selected.indicators} />
+          <TechnicalsTable indicators={selected.indicators} currency={currency} />
         </div>
       </div>
 
@@ -154,22 +221,59 @@ export function StockDetail({ ticker }: { ticker: string }) {
       <section className="card p-5 sm:p-6">
         <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
-            الرسم البياني — سنة
+            الرسم البياني —{" "}
+            {CHART_RANGES.find((r) => r.key === range)?.label ?? range}
           </h2>
           <span className="text-xs text-zinc-500 dark:text-zinc-400">
             المستويات المعروضة وفق استراتيجية «{selected.strategyAr}»
           </span>
         </div>
-        <PriceChart
-          candles={data.candles}
-          targets={selected.targets.map((t) => ({
-            label: t.label,
-            price: t.price,
-          }))}
-          stopLoss={selected.stopLoss}
-          sma50={selected.indicators.sma50}
-          sma200={selected.indicators.sma200}
-        />
+
+        {/* اختيار الفترة الزمنية */}
+        <div
+          className="mb-4 flex flex-wrap gap-1.5"
+          role="tablist"
+          aria-label="فترة الرسم البياني"
+        >
+          {CHART_RANGES.map((r) => (
+            <button
+              key={r.key}
+              role="tab"
+              aria-selected={range === r.key}
+              type="button"
+              onClick={() => switchRange(r.key)}
+              className={
+                "rounded-full px-2.5 py-1 text-xs font-medium transition-colors " +
+                (range === r.key
+                  ? "bg-brand-600 text-white shadow-sm"
+                  : "border border-zinc-300 bg-white text-zinc-600 hover:border-brand-400 hover:text-brand-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:text-brand-400")
+              }
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+
+        {chartError ? (
+          <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-950/50 dark:text-amber-300">
+            {chartError} — يُعرض آخر رسم متاح.
+          </p>
+        ) : null}
+
+        <div className={chartLoading ? "animate-pulse opacity-60" : undefined}>
+          <PriceChart
+            candles={rangeCandles ?? data.candles}
+            targets={selected.targets.map((t) => ({
+              label: t.label,
+              price: t.price,
+            }))}
+            stopLoss={selected.stopLoss}
+            sma50={selected.indicators.sma50}
+            sma200={selected.indicators.sma200}
+            tickMode={tickModeFor(range, rangeIntraday)}
+            currency={currency}
+          />
+        </div>
       </section>
 
       {/* ملاحظات */}

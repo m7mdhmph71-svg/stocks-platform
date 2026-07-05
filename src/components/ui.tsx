@@ -31,6 +31,35 @@ export function fmtShortDateAr(unixSeconds: number): string {
   }
 }
 
+/** وقت قصير للمحاور اللحظية (ساعة:دقيقة بأرقام غربية) */
+export function fmtTimeAr(unixSeconds: number): string {
+  const d = new Date(unixSeconds * 1000);
+  try {
+    return d.toLocaleTimeString("ar-u-nu-latn", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  } catch {
+    return `${String(d.getHours()).padStart(2, "0")}:${String(
+      d.getMinutes()
+    ).padStart(2, "0")}`;
+  }
+}
+
+/** شهر وسنة للمحاور طويلة المدى (٥ سنوات فأكثر) */
+export function fmtMonthYearAr(unixSeconds: number): string {
+  const d = new Date(unixSeconds * 1000);
+  try {
+    return d.toLocaleDateString("ar-u-nu-latn", {
+      month: "short",
+      year: "2-digit",
+    });
+  } catch {
+    return `${d.getMonth() + 1}/${d.getFullYear() % 100}`;
+  }
+}
+
 /** مبلغ دولاري بدقة مناسبة للقيم الصغيرة (مبالغ التطهير) */
 export function fmtDollar(n: number | null | undefined): string {
   if (n === null || n === undefined || !isFinite(n)) return "—";

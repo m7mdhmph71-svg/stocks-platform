@@ -5,6 +5,8 @@ import { StockRow } from "@/lib/types";
 import { yahooJson } from "@/lib/yahoo/client";
 
 export interface CoarseQuery {
+  /** سوق الفرز: us (الافتراضي) أو sa (تداول السعودية) */
+  region?: "us" | "sa";
   priceMin?: number;
   priceMax?: number;
   /** dayvolume */
@@ -59,9 +61,11 @@ function str(v: unknown): string | null {
   return typeof v === "string" && v.length > 0 ? v : null;
 }
 
-/** يبني معاملات الاستعلام — دائماً مع region=us */
+/** يبني معاملات الاستعلام — مقيّد بسوق واحد (us افتراضياً) */
 function buildOperands(q: CoarseQuery): RuleOperand[] {
-  const ops: RuleOperand[] = [{ operator: "eq", operands: ["region", "us"] }];
+  const ops: RuleOperand[] = [
+    { operator: "eq", operands: ["region", q.region ?? "us"] },
+  ];
 
   if (q.priceMin !== undefined && q.priceMax !== undefined) {
     ops.push({ operator: "btwn", operands: ["intradayprice", q.priceMin, q.priceMax] });
@@ -178,18 +182,24 @@ export async function runYahooScreener(q: CoarseQuery): Promise<StockRow[]> {
     if (seen.has(symbol)) continue;
     seen.add(symbol);
 
-    // استبعاد الوارنت/الوحدات/حقوق الاكتتاب — لا تظهر في فرز الأسهم العادية:
-    // عرف ناسداك: الحرف الخامس W=وارنت، R=حقوق، U=وحدة SPAC؛
-    // ولواحق نيويورك: .WS / -WT / .U / -UN / -RT
     const qt = str(raw.quoteType);
     if (qt !== null && qt !== "EQUITY") continue;
-    if (/^[A-Z]{4}[WRU]$/.test(symbol)) continue;
-    if (/[.-](WS|WT|U|UN|RT|R|W)$/.test(symbol)) continue;
 
-    // استبعاد أسهم OTC (خارج كون Finviz: بورصات NYSE/Nasdaq/AMEX فقط)
-    const exchCode = str(raw.exchange);
-    const exchName = str(raw.fullExchangeName) ?? "";
-    if (exchCode === "PNK" || /OTC|Pink/i.test(exchName)) continue;
+    if ((q.region ?? "us") === "us") {
+      // استبعاد الوارنت/الوحدات/حقوق الاكتتاب — لا تظهر في فرز الأسهم العادية:
+      // عرف ناسداك: الحرف الخامس W=وارنت، R=حقوق، U=وحدة SPAC؛
+      // ولواحق نيويورك: .WS / -WT / .U / -UN / -RT
+      if (/^[A-Z]{4}[WRU]$/.test(symbol)) continue;
+      if (/[.-](WS|WT|U|UN|RT|R|W)$/.test(symbol)) continue;
+
+      // استبعاد أسهم OTC (خارج كون Finviz: بورصات NYSE/Nasdaq/AMEX فقط)
+      const exchCode = str(raw.exchange);
+      const exchName = str(raw.fullExchangeName) ?? "";
+      if (exchCode === "PNK" || /OTC|Pink/i.test(exchName)) continue;
+    } else {
+      // السوق السعودي: أسهم تداول فقط (لاحقة .SR) — استبعاد صناديق المؤشرات
+      if (!symbol.endsWith(".SR")) continue;
+    }
 
     const open = num(raw.regularMarketOpen);
     const volume = num(raw.regularMarketVolume);

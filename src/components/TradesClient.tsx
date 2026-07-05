@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSession } from "@/components/useSession";
 import { fetchJson, fmtDateTimeAr } from "@/components/ui";
-import { fmtPrice, fmtPercent, changeColorClass } from "@/lib/format";
+import { currencyFor, fmtPrice, fmtPercent, changeColorClass } from "@/lib/format";
 import { EmptyState, ErrorBox } from "@/components/States";
 import { TableSkeleton } from "@/components/Skeletons";
 
@@ -171,19 +171,19 @@ export function TradesClient() {
                     <div className="mt-3 grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
                       <div>
                         <span className="block text-xs text-zinc-500 dark:text-zinc-400">الدخول</span>
-                        <span className="font-bold tabular-nums">{fmtPrice(t.entryPrice)}</span>
+                        <span className="font-bold tabular-nums">{fmtPrice(t.entryPrice, currencyFor(t.ticker))}</span>
                       </div>
                       <div>
                         <span className="block text-xs text-zinc-500 dark:text-zinc-400">الآن</span>
-                        <span className="font-bold tabular-nums">{fmtPrice(t.currentPrice)}</span>
+                        <span className="font-bold tabular-nums">{fmtPrice(t.currentPrice, currencyFor(t.ticker))}</span>
                       </div>
                       <div>
                         <span className="block text-xs text-emerald-600 dark:text-emerald-400">الهدف</span>
-                        <span className="font-bold tabular-nums">{fmtPrice(t.target)}</span>
+                        <span className="font-bold tabular-nums">{fmtPrice(t.target, currencyFor(t.ticker))}</span>
                       </div>
                       <div>
                         <span className="block text-xs text-red-600 dark:text-red-400">الوقف</span>
-                        <span className="font-bold tabular-nums">{fmtPrice(t.stop)}</span>
+                        <span className="font-bold tabular-nums">{fmtPrice(t.stop, currencyFor(t.ticker))}</span>
                       </div>
                     </div>
 
@@ -263,8 +263,8 @@ export function TradesClient() {
                               {t.ticker}
                             </Link>
                           </td>
-                          <td className="p-3 text-end tabular-nums">{fmtPrice(t.entryPrice)}</td>
-                          <td className="p-3 text-end tabular-nums">{fmtPrice(t.exitPrice)}</td>
+                          <td className="p-3 text-end tabular-nums">{fmtPrice(t.entryPrice, currencyFor(t.ticker))}</td>
+                          <td className="p-3 text-end tabular-nums">{fmtPrice(t.exitPrice, currencyFor(t.ticker))}</td>
                           <td className="p-3">
                             <span className={"rounded-full px-2 py-0.5 text-xs font-medium " + chip.cls}>
                               {chip.label}

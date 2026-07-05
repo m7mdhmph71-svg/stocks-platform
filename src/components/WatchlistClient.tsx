@@ -8,7 +8,7 @@ import { ShariahResult } from "@/lib/types";
 import { useSession } from "@/components/useSession";
 import { ShariahBadge } from "@/components/ShariahBadge";
 import { fetchJson } from "@/components/ui";
-import { fmtPrice, fmtPercent, changeColorClass } from "@/lib/format";
+import { currencyFor, fmtPrice, fmtPercent, changeColorClass } from "@/lib/format";
 import { EmptyState, ErrorBox } from "@/components/States";
 import { TableSkeleton } from "@/components/Skeletons";
 
@@ -142,7 +142,7 @@ export function WatchlistClient() {
                     {r.name}
                   </td>
                   <td className="p-3 text-end tabular-nums text-zinc-900 dark:text-zinc-50">
-                    {fmtPrice(r.price)}
+                    {fmtPrice(r.price, currencyFor(r.ticker))}
                   </td>
                   <td className={"p-3 text-end font-bold tabular-nums " + changeColorClass(r.changePercent)}>
                     <span dir="ltr">{fmtPercent(r.changePercent)}</span>
