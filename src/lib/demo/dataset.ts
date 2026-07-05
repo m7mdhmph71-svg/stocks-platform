@@ -347,6 +347,14 @@ function passesPreset(r: StockRow, preset: StrategyKey): boolean {
         floatShares !== null && floatShares > 50 * M &&
         price > 5
       );
+    case "trend":
+      // تقريب تجريبي: سيولة وجودة وسعر فوق 5 مع أداء شهري موجب
+      return (
+        marketCap !== null && marketCap >= 300 * M &&
+        avgVolume3m !== null && avgVolume3m > 500_000 &&
+        price > 5 &&
+        week !== null && week > 0
+      );
   }
 }
 

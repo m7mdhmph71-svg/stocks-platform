@@ -37,7 +37,9 @@ export const PLAN_LIMITS: Record<PlanKey, PlanLimits> = {
   PRO: {
     watchlistMax: 50,
     openTradesMax: 30,
-    backtestMaxDays: 40,
+    // النافذة الفعلية = الأدنى من حد الخطة وحد الاستراتيجية
+    // (المضاربة 40 — الاتجاه 150 لأن أفق صفقته 30 جلسة)
+    backtestMaxDays: 150,
     backtestCompare: true,
     alerts: true,
     whatsappAccountCommands: true,

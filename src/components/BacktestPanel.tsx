@@ -13,14 +13,20 @@ import type {
   BacktestResponse,
 } from "@/app/api/backtest/route";
 
-type Strategy = "liquidity" | "momentum";
+type Strategy = "liquidity" | "momentum" | "trend";
 
 const STRATEGY_LABELS: Record<Strategy, string> = {
   liquidity: "صيد السيولة",
   momentum: "الزخم / السوينق",
+  trend: "الاتجاه الصاعد",
 };
 
-const DAY_OPTIONS = [10, 20, 30, 40];
+/** خيارات النافذة: المضاربة قصيرة، والاتجاه يحتاج مدى يكتمل فيه أفقه (30 جلسة) */
+const DAY_OPTIONS_BY_STRATEGY: Record<Strategy, number[]> = {
+  liquidity: [10, 20, 30, 40],
+  momentum: [10, 20, 30, 40],
+  trend: [60, 90, 120, 150],
+};
 
 const OUTCOME_CHIP: Record<
   string,
@@ -93,6 +99,12 @@ function StatTile({
 export function BacktestPanel() {
   const [strategy, setStrategy] = useState<Strategy>("momentum");
   const [days, setDays] = useState(30);
+
+  const switchStrategy = useCallback((k: Strategy) => {
+    setStrategy(k);
+    // مدة افتراضية مناسبة للاستراتيجية الجديدة
+    setDays(k === "trend" ? 120 : 30);
+  }, []);
   const [data, setData] = useState<BacktestResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -149,7 +161,7 @@ export function BacktestPanel() {
           <button
             key={k}
             type="button"
-            onClick={() => setStrategy(k)}
+            onClick={() => switchStrategy(k)}
             className={
               "rounded-full px-3 py-1.5 text-sm font-medium transition-colors " +
               (strategy === k
@@ -166,7 +178,7 @@ export function BacktestPanel() {
           className="rounded-lg border border-zinc-300 bg-white px-2 py-1.5 text-sm text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
           aria-label="عدد الجلسات"
         >
-          {DAY_OPTIONS.map((d) => (
+          {DAY_OPTIONS_BY_STRATEGY[strategy].map((d) => (
             <option key={d} value={d}>
               آخر {d} جلسة
             </option>
@@ -197,7 +209,7 @@ export function BacktestPanel() {
       {comparing ? (
         <div className="rounded-xl border border-zinc-200 p-6 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
           <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-brand-500 border-t-transparent align-middle" />{" "}
-          نحاكي كل إشارة بأربع صيغ خروج مختلفة — قد يستغرق دقيقة أول مرة.
+          نحاكي كل إشارة بست صيغ خروج مختلفة — قد يستغرق دقائق أول مرة.
         </div>
       ) : null}
 
@@ -209,7 +221,7 @@ export function BacktestPanel() {
             </h3>
             <p className="mt-1 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
               نفس {compare.totalSignals} إشارة عبر {compare.daysTested} جلسة،
-              حوكيت بأربع طرق خروج — القرار بالأرقام لا بالانطباع.
+              حوكيت بست طرق خروج — القرار بالأرقام لا بالانطباع.
             </p>
           </div>
           <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">

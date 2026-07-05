@@ -25,7 +25,7 @@ import {
 } from "@/lib/demo/dataset";
 import { cached } from "@/lib/cache";
 
-const STRATEGIES: StrategyKey[] = ["liquidity", "momentum", "longterm"];
+const STRATEGIES: StrategyKey[] = ["liquidity", "momentum", "trend", "longterm"];
 
 export type StockDetailResult =
   | { ok: true; data: StockDetailResponse }

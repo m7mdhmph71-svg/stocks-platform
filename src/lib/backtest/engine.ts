@@ -26,7 +26,10 @@ import { computeTechnicals } from "@/lib/targets/technicals";
 import { computeTargets } from "@/lib/targets/engine";
 
 /** استراتيجيات قابلة للاختبار التاريخي (الاستثمار يتطلب قوائم مالية تاريخية) */
-export type BacktestStrategy = Extract<StrategyKey, "liquidity" | "momentum">;
+export type BacktestStrategy = Extract<
+  StrategyKey,
+  "liquidity" | "momentum" | "trend"
+>;
 
 export type TradeOutcome = "target" | "stop" | "time" | "open";
 
@@ -99,10 +102,29 @@ interface TickerSeries {
 
 /** كم جلسة سابقة يحتاجها تقييم الشروط والمؤشرات عند الفهرس i */
 const MIN_HISTORY = 21;
+/** الاتجاه يحتاج تاريخ متوسط 200 يوم وقمم/قيعان 52 أسبوعاً */
+const MIN_HISTORY_TREND = 210;
 const RELVOL_WINDOW = 20;
 const WEEK_SESSIONS = 5;
 /** أفق المحاكاة: أقصى جلسات احتفاظ قبل الخروج الزمني */
 export const TRADE_HORIZON = 15;
+/** الاتجاه أبطأ إيقاعاً — أفقه ضعف أفق المضاربة */
+export const TRADE_HORIZON_TREND = 30;
+
+export function minHistoryFor(strategy: BacktestStrategy): number {
+  return strategy === "trend" ? MIN_HISTORY_TREND : MIN_HISTORY;
+}
+export function horizonFor(strategy: BacktestStrategy): number {
+  return strategy === "trend" ? TRADE_HORIZON_TREND : TRADE_HORIZON;
+}
+
+/** متوسط بسيط للإغلاقات المنتهية عند i (يشمله) */
+function smaAt(candles: Candle[], i: number, n: number): number | null {
+  if (i + 1 < n) return null;
+  let sum = 0;
+  for (let k = i - n + 1; k <= i; k++) sum += candles[k].close;
+  return sum / n;
+}
 
 function pct(now: number, base: number): number {
   return ((now - base) / base) * 100;
@@ -114,6 +136,7 @@ function matchesAt(
   candles: Candle[],
   i: number
 ): { changeFromOpenPercent: number; changePercent: number } | null {
+  if (strategy === "trend") return matchesTrendAt(candles, i);
   const c = candles[i];
   const prev = candles[i - 1];
   if (!c || !prev || c.open <= 0 || prev.close <= 0) return null;
@@ -146,6 +169,59 @@ function matchesAt(
   return { changeFromOpenPercent: changeFromOpen, changePercent: dayChange };
 }
 
+/**
+ * إشارة «الاتجاه الصاعد» عند i: حالة اتجاه قائمة (فوق SMA200، وSMA50
+ * فوقه، قرب قمة 52أ وبعيداً عن قاعها، زخم شهري موجب) + قادح دخول
+ * (إغلاق اليوم قمة إغلاق جديدة لخمسين جلسة) — القادح يجعل الإشارة حدثاً
+ * لا حالة مستمرة تغرق الإحصاء بصفقات متطابقة.
+ */
+function matchesTrendAt(
+  candles: Candle[],
+  i: number
+): { changeFromOpenPercent: number; changePercent: number } | null {
+  const c = candles[i];
+  const prev = candles[i - 1];
+  if (!c || !prev || c.open <= 0 || prev.close <= 0) return null;
+  const price = c.close;
+  if (price < 5) return null;
+
+  // سيولة تاريخية معقولة (متوسط 20 جلسة)
+  let volSum = 0;
+  for (let k = i - RELVOL_WINDOW; k < i; k++) volSum += candles[k].volume;
+  if (volSum / RELVOL_WINDOW < 300_000) return null;
+
+  const sma200 = smaAt(candles, i, 200);
+  const sma50 = smaAt(candles, i, 50);
+  if (sma200 === null || sma50 === null) return null;
+  if (!(price > sma200 && sma50 > sma200)) return null;
+
+  // قمة/قاع 52 أسبوعاً حتى i
+  const start52 = Math.max(0, i - 251);
+  let h52 = -Infinity;
+  let l52 = Infinity;
+  for (let k = start52; k <= i; k++) {
+    if (candles[k].high > h52) h52 = candles[k].high;
+    if (candles[k].low < l52) l52 = candles[k].low;
+  }
+  if (!(price >= 0.85 * h52 && price >= 1.25 * l52)) return null;
+
+  // زخم شهري موجب
+  const monthRef = candles[i - 21];
+  if (!monthRef || monthRef.close <= 0 || pct(price, monthRef.close) <= 0) {
+    return null;
+  }
+
+  // القادح: قمة إغلاق جديدة لخمسين جلسة
+  for (let k = i - 50; k < i; k++) {
+    if (candles[k].close >= price) return null;
+  }
+
+  return {
+    changeFromOpenPercent: pct(c.close, c.open),
+    changePercent: pct(c.close, prev.close),
+  };
+}
+
 /** خطة الصفقة عند الإشارة: الهدف الأول والوقف من محرك الأهداف نفسه */
 function planAt(
   strategy: BacktestStrategy,
@@ -169,7 +245,8 @@ function simulateTrade(
   i: number,
   entry: number,
   target: number,
-  stop: number
+  stop: number,
+  horizon = TRADE_HORIZON
 ): {
   outcome: TradeOutcome;
   exitPrice: number | null;
@@ -177,7 +254,7 @@ function simulateTrade(
   sessionsHeld: number | null;
 } {
   const lastIndex = candles.length - 1;
-  const end = Math.min(i + TRADE_HORIZON, lastIndex);
+  const end = Math.min(i + horizon, lastIndex);
 
   for (let j = i + 1; j <= end; j++) {
     const c = candles[j];
@@ -219,7 +296,7 @@ function simulateTrade(
   }
 
   // لم يتحقق هدف ولا وقف داخل الأفق
-  if (i + TRADE_HORIZON <= lastIndex) {
+  if (i + horizon <= lastIndex) {
     const exit = candles[end].close;
     return {
       outcome: "time",
@@ -377,7 +454,8 @@ function simulateTrailExit(
   stop0: number,
   atr: number,
   horizonEnd: number,
-  stopFloor: number | null
+  stopFloor: number | null,
+  horizon = TRADE_HORIZON
 ): SimOutcome | null {
   let trail = stop0;
   let maxHigh = candles[i].high;
@@ -398,7 +476,7 @@ function simulateTrailExit(
     if (c.high > maxHigh) maxHigh = c.high;
   }
 
-  if (horizonEnd < candles.length - 1 || i + TRADE_HORIZON <= candles.length - 1) {
+  if (horizonEnd < candles.length - 1 || i + horizon <= candles.length - 1) {
     return { ret: pct(candles[horizonEnd].close, entry), sessions: horizonEnd - i };
   }
   return null; // الأفق لم يكتمل — صفقة جارية تُستثنى من المقارنة
@@ -410,9 +488,10 @@ function simulateFixedExit(
   i: number,
   entry: number,
   target: number,
-  stop: number
+  stop: number,
+  horizon = TRADE_HORIZON
 ): SimOutcome | null {
-  const sim = simulateTrade(candles, i, entry, target, stop);
+  const sim = simulateTrade(candles, i, entry, target, stop, horizon);
   if (sim.outcome === "open" || sim.tradeReturnPercent === null) return null;
   return { ret: sim.tradeReturnPercent, sessions: sim.sessionsHeld ?? 0 };
 }
@@ -424,10 +503,11 @@ function simulateHybridExit(
   entry: number,
   target: number,
   stop: number,
-  atr: number
+  atr: number,
+  horizon = TRADE_HORIZON
 ): SimOutcome | null {
   const lastIndex = candles.length - 1;
-  const end = Math.min(i + TRADE_HORIZON, lastIndex);
+  const end = Math.min(i + horizon, lastIndex);
 
   for (let j = i + 1; j <= end; j++) {
     const c = candles[j];
@@ -446,7 +526,8 @@ function simulateHybridExit(
         Math.max(stop, entry),
         atr,
         end,
-        entry // «ارفع الوقف لسعر الدخول» — لا ينزل تحته
+        entry, // «ارفع الوقف لسعر الدخول» — لا ينزل تحته
+        horizon
       );
       if (rest === null) return null; // الباقي جارٍ — الصفقة كلها تُستثنى
       return {
@@ -456,7 +537,7 @@ function simulateHybridExit(
     }
   }
 
-  if (i + TRADE_HORIZON <= lastIndex) {
+  if (i + horizon <= lastIndex) {
     return { ret: pct(candles[end].close, entry), sessions: end - i };
   }
   return null;
@@ -508,11 +589,13 @@ export function runFormulaComparison(
     nextclose: [],
   };
   let totalSignals = 0;
+  const minHistory = minHistoryFor(strategy);
+  const horizon = horizonFor(strategy);
 
   for (const s of series) {
     const { candles } = s;
-    if (candles.length < MIN_HISTORY + 2) continue;
-    const start = Math.max(MIN_HISTORY, candles.length - daysBack);
+    if (candles.length < minHistory + 2) continue;
+    const start = Math.max(minHistory, candles.length - daysBack);
 
     for (let i = start; i < candles.length; i++) {
       if (!matchesAt(strategy, candles, i)) continue;
@@ -533,18 +616,18 @@ export function runFormulaComparison(
       if (!(sT > entry && sS < entry && sS > 0)) continue;
 
       totalSignals++;
-      const horizonEnd = Math.min(i + TRADE_HORIZON, candles.length - 1);
+      const horizonEnd = Math.min(i + horizon, candles.length - 1);
 
-      const rClassic = simulateFixedExit(candles, i, entry, cT, cS);
+      const rClassic = simulateFixedExit(candles, i, entry, cT, cS, horizon);
       if (rClassic) buckets.classic.push(rClassic);
 
-      const rStructure = simulateFixedExit(candles, i, entry, sT, sS);
+      const rStructure = simulateFixedExit(candles, i, entry, sT, sS, horizon);
       if (rStructure) buckets.structure.push(rStructure);
 
-      const rTrail = simulateTrailExit(candles, i, entry, sS, atr, horizonEnd, null);
+      const rTrail = simulateTrailExit(candles, i, entry, sS, atr, horizonEnd, null, horizon);
       if (rTrail) buckets.trail.push(rTrail);
 
-      const rHybrid = simulateHybridExit(candles, i, entry, sT, sS, atr);
+      const rHybrid = simulateHybridExit(candles, i, entry, sT, sS, atr, horizon);
       if (rHybrid) buckets.hybrid.push(rHybrid);
 
       // اختبارا التوقيت الخالص: أين نافذة الربح حول الإشارة؟
@@ -564,7 +647,7 @@ export function runFormulaComparison(
   return {
     strategy,
     totalSignals,
-    daysTested: Math.min(daysBack, Math.max(0, longest - MIN_HISTORY)),
+    daysTested: Math.min(daysBack, Math.max(0, longest - minHistory)),
     variants: (Object.keys(buckets) as ExitFormulaKey[]).map((k) =>
       summarizeVariant(k, buckets[k])
     ),
@@ -578,11 +661,13 @@ export function runBacktest(
   daysBack: number
 ): BacktestResult {
   const byDay = new Map<number, BacktestSignal[]>();
+  const minHistory = minHistoryFor(strategy);
+  const horizon = horizonFor(strategy);
 
   for (const s of series) {
     const { candles } = s;
-    if (candles.length < MIN_HISTORY + 2) continue;
-    const start = Math.max(MIN_HISTORY, candles.length - daysBack);
+    if (candles.length < minHistory + 2) continue;
+    const start = Math.max(minHistory, candles.length - daysBack);
 
     for (let i = start; i < candles.length; i++) {
       const m = matchesAt(strategy, candles, i);
@@ -591,7 +676,7 @@ export function runBacktest(
       if (!plan) continue; // لا خطة صالحة (مؤشرات غير كافية) — نتخطى بصدق
 
       const c = candles[i];
-      const sim = simulateTrade(candles, i, c.close, plan.target, plan.stop);
+      const sim = simulateTrade(candles, i, c.close, plan.target, plan.stop, horizon);
 
       const signal: BacktestSignal = {
         ticker: s.ticker,
@@ -611,7 +696,7 @@ export function runBacktest(
   }
 
   const longest = series.reduce((m, s) => Math.max(m, s.candles.length), 0);
-  const daysTested = Math.min(daysBack, Math.max(0, longest - MIN_HISTORY));
+  const daysTested = Math.min(daysBack, Math.max(0, longest - minHistory));
 
   const days: BacktestDay[] = Array.from(byDay.entries())
     .map(([time, signals]) => ({

@@ -11,6 +11,7 @@ import {
 } from "@/lib/types";
 import { PRESETS } from "@/lib/filters/presets";
 import { SAUDI_PRESET } from "@/lib/filters/saudi";
+import { TREND_PRESET } from "@/lib/filters/trend";
 import { saveSnapshot } from "@/lib/history";
 import { buildShareMessage } from "@/lib/whatsapp/format";
 import { fetchJson, fmtDateTimeAr } from "@/components/ui";
@@ -25,7 +26,11 @@ import { EmptyState, ErrorBox } from "@/components/States";
 
 type Tab = StrategyKey | "saudi" | "custom" | "history";
 
-const STRATEGY_KEYS: StrategyKey[] = ["liquidity", "momentum", "longterm"];
+const STRATEGY_KEYS: Array<Exclude<StrategyKey, "trend">> = [
+  "liquidity",
+  "momentum",
+  "longterm",
+];
 
 const VALID_FIELDS: FilterField[] = [
   "price",
@@ -98,9 +103,11 @@ export function ScreenerClient() {
         ? "history"
         : presetParam === "saudi"
           ? "saudi"
-          : STRATEGY_KEYS.includes(presetParam as StrategyKey)
-            ? (presetParam as StrategyKey)
-            : "liquidity";
+          : presetParam === "trend"
+            ? "trend"
+            : STRATEGY_KEYS.includes(presetParam as Exclude<StrategyKey, "trend">)
+              ? (presetParam as StrategyKey)
+              : "liquidity";
 
   const customConditions = useMemo(
     () => parseConditionsParam(conditionsParam),
@@ -144,9 +151,11 @@ export function ScreenerClient() {
               ? "فلتر مخصص"
               : tab === "saudi"
                 ? SAUDI_PRESET.nameAr
-                : tab !== "history"
-                  ? PRESETS[tab].nameAr
-                  : "";
+                : tab === "trend"
+                  ? TREND_PRESET.nameAr
+                  : tab !== "history"
+                    ? PRESETS[tab].nameAr
+                    : "";
           if (nameAr) saveSnapshot(tab, nameAr, res);
         }
       })
@@ -189,11 +198,12 @@ export function ScreenerClient() {
   );
 
   const preset =
-    tab !== "custom" && tab !== "history" && tab !== "saudi"
+    tab !== "custom" && tab !== "history" && tab !== "saudi" && tab !== "trend"
       ? PRESETS[tab]
       : null;
-  /** بطاقة الوصف: الاستراتيجيات من PRESETS والسعودي من إعداده المستقل */
-  const info = tab === "saudi" ? SAUDI_PRESET : preset;
+  /** بطاقة الوصف: الثلاثة من PRESETS، والسعودي والاتجاه من إعدادَيهما */
+  const info =
+    tab === "saudi" ? SAUDI_PRESET : tab === "trend" ? TREND_PRESET : preset;
 
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-8 sm:px-6">
@@ -230,6 +240,20 @@ export function ScreenerClient() {
             {PRESETS[k].nameAr}
           </button>
         ))}
+        <button
+          role="tab"
+          aria-selected={tab === "trend"}
+          type="button"
+          onClick={() => switchTab("trend")}
+          className={
+            "rounded-full px-4 py-2 text-sm font-medium transition-colors " +
+            (tab === "trend"
+              ? "bg-brand-600 text-white shadow-sm"
+              : "border border-zinc-300 bg-white text-zinc-600 hover:border-brand-400 hover:text-brand-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:text-brand-400")
+          }
+        >
+          {TREND_PRESET.nameAr}
+        </button>
         <button
           role="tab"
           aria-selected={tab === "saudi"}

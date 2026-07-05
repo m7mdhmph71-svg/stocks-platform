@@ -10,9 +10,13 @@ export const STRATEGY_NAMES_AR: Record<StrategyKey, string> = {
   liquidity: "صيد السيولة",
   momentum: "الزخم / السوينق",
   longterm: "الاستثمار طويل المدى",
+  trend: "الاتجاه الصاعد",
 };
 
-export const PRESETS: Record<StrategyKey, ScreenerPreset> = {
+/** فلاتر المستخدم الثلاثة بدلالات Finviz الحرفية — «الاتجاه» له ملفه المستقل */
+export type FinvizStrategyKey = Exclude<StrategyKey, "trend">;
+
+export const PRESETS: Record<FinvizStrategyKey, ScreenerPreset> = {
   // ------------------------------------------------------------
   // 1) صيد السيولة — مضاربة قصيرة
   // ------------------------------------------------------------

@@ -9,10 +9,10 @@ import {
   BacktestResult,
   BacktestStrategy,
   FormulaComparison,
+  horizonFor,
   runBacktest,
   runFormulaComparison,
   summarizeBacktest,
-  TRADE_HORIZON,
 } from "@/lib/backtest/engine";
 
 export const dynamic = "force-dynamic";
@@ -21,8 +21,11 @@ export const maxDuration = 120;
 
 /** حجم كون الاختبار (أعلى الأسهم سيولة ضمن نطاق سعري موسع) */
 const UNIVERSE_CAP = 300;
-/** أقصى نافذة اختبار بالجلسات */
-const MAX_DAYS = 40;
+/** أقصى نافذة اختبار بالجلسات لكل استراتيجية: المضاربة قصيرة النفس،
+ * والاتجاه يحتاج مدى أطول ليكتمل أفق صفقاته (شموع سنتين تسمح بـ150) */
+function maxDaysFor(strategy: BacktestStrategy): number {
+  return strategy === "trend" ? 150 : 40;
+}
 const DEFAULT_DAYS = 30;
 
 const FLOAT_LIMITS: Record<
@@ -31,6 +34,7 @@ const FLOAT_LIMITS: Record<
 > = {
   liquidity: { min: null, max: 50_000_000 },
   momentum: { min: 20_000_000, max: null },
+  trend: { min: null, max: null }, // كون الجودة لا يقيده شرط أسهم حرة
 };
 
 export interface BacktestResponse extends BacktestResult {
@@ -47,19 +51,32 @@ export interface BacktestCompareResponse extends FormulaComparison {
 
 type Series = { ticker: string; name: string; candles: Awaited<ReturnType<typeof fetchCandles>> }[];
 
-/** الكون + شموع 6 أشهر — مشترك بين الاختبار العادي ومقارنة الصيغ */
-async function loadSeries(): Promise<Series> {
-  // الكون: أعلى الأسهم سيولة بنطاق سعري موسع (0.5-15) ليشمل أسهماً
+/** الكون + الشموع بحسب الاستراتيجية — مشترك بين الاختبار ومقارنة الصيغ */
+async function loadSeries(strategy: BacktestStrategy): Promise<Series> {
+  // المضاربة: أعلى الأسهم سيولة بنطاق سعري موسع (0.5-15) ليشمل أسهماً
   // كانت داخل نطاق 1-10 في الجلسات الماضية وانزاحت قليلاً منذ ذلك الحين.
-  const universe = await runYahooScreener({
-    priceMin: 0.5,
-    priceMax: 15,
-    volumeMin: 300_000,
-    size: 250,
-    cap: UNIVERSE_CAP,
-  });
+  // الاتجاه: كون جودة وسيولة (سعر ≥ 5، قيمة ≥ 300م) وشموع سنتين
+  // (بوابة SMA200 تحتاج 210 جلسات تاريخ قبل أول إشارة).
+  const universe = await runYahooScreener(
+    strategy === "trend"
+      ? {
+          priceMin: 5,
+          avgVolumeMin: 500_000,
+          marketCapMin: 300_000_000,
+          size: 250,
+          cap: UNIVERSE_CAP,
+        }
+      : {
+          priceMin: 0.5,
+          priceMax: 15,
+          volumeMin: 300_000,
+          size: 250,
+          cap: UNIVERSE_CAP,
+        }
+  );
 
-  // شموع 6 أشهر لكل سهم (بتوازٍ محدود؛ الكاش يجعل الطلبات التالية فورية)
+  const range = strategy === "trend" ? "2y" : "6mo";
+  const minLen = strategy === "trend" ? 250 : 30;
   const series: Series = [];
   const CONC = 8;
   for (let i = 0; i < universe.length; i += CONC) {
@@ -68,11 +85,11 @@ async function loadSeries(): Promise<Series> {
       batch.map(async (r) => ({
         ticker: r.ticker,
         name: r.name,
-        candles: await fetchCandles(r.ticker, "6mo"),
+        candles: await fetchCandles(r.ticker, range),
       }))
     );
     for (const f of fetched) {
-      if (f.candles.length >= 30) series.push(f);
+      if (f.candles.length >= minLen) series.push(f);
     }
   }
   return series;
@@ -83,7 +100,7 @@ async function buildComparison(
   strategy: BacktestStrategy,
   daysBack: number
 ): Promise<BacktestCompareResponse> {
-  const series = await loadSeries();
+  const series = await loadSeries(strategy);
   const cmp = runFormulaComparison(strategy, series, daysBack);
   return {
     ...cmp,
@@ -91,9 +108,9 @@ async function buildComparison(
     universeSize: series.length,
     notesAr: [
       "كل الصيغ تُحاكى على الإشارات نفسها: دخول بإغلاق جلسة الإشارة، الوقف يُغلَّب تحفظاً عند التلامس المزدوج، وفجوات الافتتاح تُحتسب بسعر الافتتاح.",
-      `الخروج الزمني بعد ${TRADE_HORIZON} جلسة لكل الصيغ، والإشارات غير المحسومة بعدُ مستثناة.`,
+      `الخروج الزمني بعد ${horizonFor(strategy)} جلسة لكل الصيغ، والإشارات غير المحسومة بعدُ مستثناة.`,
       "المقارنة قبل شرط الأسهم الحرة (يستوي أثره على كل الصيغ فلا يغيّر الترتيب).",
-      "المنصة تعتمد لكل استراتيجية صيغتها الرابحة تجريبياً: الكلاسيكية للزخم والهيكلية لصيد السيولة.",
+      "المنصة تعتمد لكل استراتيجية صيغتها الرابحة تجريبياً: الكلاسيكية للزخم، والهيكلية لصيد السيولة والاتجاه الصاعد — وللاتجاه الوقفُ المتحرك أفضل خطة خروج عملية.",
       "صيغتا «ليلة واحدة» و«جلسة واحدة» اختبارا توقيت خالصان (بلا هدف ولا وقف) — تكشفان أين نافذة الربح حول الإشارة.",
     ],
   };
@@ -104,7 +121,7 @@ async function buildBacktest(
   daysBack: number
 ): Promise<BacktestResponse> {
   const notesAr: string[] = [];
-  const series = await loadSeries();
+  const series = await loadSeries(strategy);
 
   // الاختبار الأولي (بلا شرط الأسهم الحرة)
   const prelim = runBacktest(strategy, series, daysBack);
@@ -156,8 +173,10 @@ async function buildBacktest(
     notesAr.push(`استُبعد ${unknownFloat} رمزاً مجهول الأسهم الحرة.`);
   }
   notesAr.push(
-    `خطة الصفقة المحاكاة: دخول عند إغلاق جلسة الإشارة، خروج عند الهدف الأول أو الوقف (المحسوبين بمحرك أهداف المنصة من بيانات ما قبل الإشارة فقط) — الوقف يُغلَّب تحفظاً إن لامسا معاً في جلسة واحدة، وخروج زمني بعد ${TRADE_HORIZON} جلسة.`,
-    `الكون: أعلى ${series.length} سهماً سيولة حالياً بنطاق سعري 0.5-15$ — أسهم شُطبت أو تغيرت جذرياً لا يشملها الاختبار (انحياز البقاء).`,
+    `خطة الصفقة المحاكاة: دخول عند إغلاق جلسة الإشارة، خروج عند الهدف الأول أو الوقف (المحسوبين بمحرك أهداف المنصة من بيانات ما قبل الإشارة فقط) — الوقف يُغلَّب تحفظاً إن لامسا معاً في جلسة واحدة، وخروج زمني بعد ${horizonFor(strategy)} جلسة.`,
+    strategy === "trend"
+      ? `الكون: ${series.length} سهم جودة (سعر ≥ 5$، قيمة ≥ 300م، متوسط حجم ≥ 500 ألف) — إشارة الدخول: قمة إغلاق جديدة لخمسين جلسة داخل هيكل صاعد قائم.`
+      : `الكون: أعلى ${series.length} سهماً سيولة حالياً بنطاق سعري 0.5-15$ — أسهم شُطبت أو تغيرت جذرياً لا يشملها الاختبار (انحياز البقاء).`,
     "الشروط مقيسة على أسعار إغلاق الجلسات (الفرز الحي يقيسها لحظياً أثناء التداول)، والحجم النسبي مُقرَّب بمتوسط 20 جلسة."
   );
 
@@ -182,9 +201,9 @@ export async function GET(request: NextRequest) {
       { status: 400 }
     );
   }
-  if (preset !== "liquidity" && preset !== "momentum") {
+  if (preset !== "liquidity" && preset !== "momentum" && preset !== "trend") {
     return NextResponse.json(
-      { error: "حدّد فلتراً قابلاً للاختبار: liquidity أو momentum." },
+      { error: "حدّد فلتراً قابلاً للاختبار: liquidity أو momentum أو trend." },
       { status: 400 }
     );
   }
@@ -192,11 +211,12 @@ export async function GET(request: NextRequest) {
   // حدود الخطة: الزائر وغير المشترك على حدود المجانية
   const limits = await limitsFor(await sessionUserId());
 
+  const strategyMax = maxDaysFor(preset);
   const daysRaw = Number(sp.get("days") ?? DEFAULT_DAYS);
   const requested = Number.isFinite(daysRaw) ? Math.floor(daysRaw) : DEFAULT_DAYS;
   const days = Math.max(
     5,
-    Math.min(MAX_DAYS, Math.min(limits.backtestMaxDays, requested))
+    Math.min(strategyMax, Math.min(limits.backtestMaxDays, requested))
   );
   const clamped = requested > days;
 
@@ -226,7 +246,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         ...res,
         notesAr: [
-          `نافذة الخطة المجانية ${days} جلسات — الترقية للاحترافية توسعها إلى ${MAX_DAYS}.`,
+          `نافذة الخطة المجانية ${days} جلسات — الترقية للاحترافية توسعها إلى ${strategyMax}.`,
           ...res.notesAr,
         ],
       });

@@ -8,6 +8,7 @@ import {
 } from "@/lib/types";
 import { PRESETS } from "@/lib/filters/presets";
 import { SAUDI_PRESET } from "@/lib/filters/saudi";
+import { TREND_PRESET, passesTrendTechnicals } from "@/lib/filters/trend";
 import { saudiNameAr } from "@/lib/saudi/companies";
 import { applyConditions, parseConditions } from "@/lib/filters/engine";
 import {
@@ -203,7 +204,12 @@ async function screenLive(
 
   // 1) Finviz Elite إن توفر التوكن — يطبّق فلاتر المستخدم حرفياً
   //    (أمريكي فقط — لا يغطي تداول)
-  if (preset !== "custom" && preset !== "saudi" && finvizAvailable()) {
+  if (
+    preset !== "custom" &&
+    preset !== "saudi" &&
+    preset !== "trend" &&
+    finvizAvailable()
+  ) {
     const fv = await fetchFinvizRows(PRESETS[preset].finvizQuery);
     if (fv && fv.length > 0) {
       const { rows } = await enrichFundamentals(fv.slice(0, ENRICH_CAP));
@@ -222,6 +228,47 @@ async function screenLive(
   // 2) ياهو: فرز خشن (بترقيم صفحات لتغطية كل النتائج) ثم فلترة دقيقة محلياً
   const coarse = coarseFromConditions(conds);
   if (preset === "saudi") coarse.region = "sa";
+
+  // «الاتجاه الصاعد»: كون جودة وسيولة ثم بوابة فنية على شموع سنة
+  if (preset === "trend") {
+    coarse.cap = 400;
+    let candidates = await runYahooScreener(coarse);
+    candidates = candidates.slice(0, 400);
+    const final: StockRow[] = [];
+    const CONC = 6;
+    for (let i = 0; i < candidates.length && final.length < 60; i += CONC) {
+      const batch = candidates.slice(i, i + CONC);
+      const gated = await Promise.all(
+        batch.map(async (r) => {
+          const candles = await fetchCandles(r.ticker, "1y");
+          if (candles.length < 200) return null;
+          const tech = computeTechnicals(candles);
+          if (!passesTrendTechnicals(r.price, tech).pass) return null;
+          return {
+            ...r,
+            weekPerfPercent: tech.weekPerfPercent,
+            targets: computeTargets("trend", r.price, tech, null),
+          };
+        })
+      );
+      for (const g of gated) if (g) final.push(g);
+    }
+    // الفحص الشرعي للناجين فقط (عادة عشرات لا مئات)
+    const enriched = await enrichFundamentals(final);
+    notesAr.push(
+      `فُحص فنياً ${Math.min(candidates.length, 400)} مرشحاً من كون الجودة والسيولة — اجتاز البوابة ${enriched.rows.length}.`,
+      "المصدر: Yahoo Finance (فرز مخصص + بيانات أساسية)."
+    );
+    return {
+      preset,
+      source: "yahoo",
+      asOf: new Date().toISOString(),
+      total: enriched.rows.length,
+      rows: enriched.rows,
+      notesAr,
+    };
+  }
+
   if (preset === "longterm") {
     // تضييق خادمي بالشروط الأساسية القابلة للتفويض — يقلص الكون من آلاف
     // إلى بضع مئات، والبوابة المحلية (passesLongtermFundamentals) تبقى الحاسمة
@@ -407,9 +454,12 @@ export async function GET(request: NextRequest) {
   } else if (presetParam === "saudi") {
     preset = "saudi";
     conds = SAUDI_PRESET.conditions;
+  } else if (presetParam === "trend") {
+    preset = "trend";
+    conds = TREND_PRESET.conditions;
   } else if ((PRESET_KEYS as string[]).includes(presetParam)) {
     preset = presetParam as StrategyKey;
-    conds = PRESETS[preset as StrategyKey].conditions;
+    conds = PRESETS[preset as Exclude<StrategyKey, "trend">].conditions;
   } else {
     return NextResponse.json(
       { error: "فلتر غير معروف. الفلاتر المتاحة: liquidity, momentum, longterm, saudi, custom." },

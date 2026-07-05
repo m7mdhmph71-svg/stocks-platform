@@ -97,7 +97,8 @@ export interface ShariahResult {
 // الأهداف والتوقعات
 // ------------------------------------------------------------
 
-export type StrategyKey = "liquidity" | "momentum" | "longterm";
+/** الاستراتيجيات: الثلاث الأصلية + «الاتجاه الصاعد» (منهج القوة الموثق) */
+export type StrategyKey = "liquidity" | "momentum" | "longterm" | "trend";
 
 export type Trend = "UP" | "DOWN" | "SIDEWAYS";
 

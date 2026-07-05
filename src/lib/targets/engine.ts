@@ -144,7 +144,7 @@ function structuralStop(
  * تعيد null عند غياب ATR — فيسقط الحساب للصيغة الكلاسيكية.
  */
 function buildStructured(
-  strategy: "liquidity" | "momentum",
+  strategy: Exclude<StrategyKey, "longterm">,
   entry: number,
   t: TechnicalSnapshot
 ): { targets: RawTarget[]; stop: RawStop } | null {
@@ -152,6 +152,7 @@ function buildStructured(
   if (atr === null) return null;
 
   // ١) الوقف: بنية السوق أولاً، ثم مرشحات الصيغة الكلاسيكية
+  // (الاتجاه يسقط لمرشحات الزخم الكلاسيكية عند غياب القيعان)
   const classic =
     strategy === "liquidity" ? buildLiquidity(entry, t) : buildMomentum(entry, t);
   const stop = structuralStop(entry, atr, t.swingLows) ?? classic.stop;
@@ -492,6 +493,8 @@ function buildExpectationAr(
  * زر «قارن صيغ الهدف/الوقف».
  */
 export function defaultFormulaFor(strategy: StrategyKey): TargetFormula {
+  // الزخم قصير الأفق → كلاسيكية (أهداف قريبة تُصاب قبل الانعكاس)؛
+  // السيولة والاتجاه → هيكلية (وقف بنية السوق يحتمل التذبذب الطبيعي)
   return strategy === "momentum" ? "classic" : "structure";
 }
 
@@ -535,6 +538,7 @@ export function computeTargets(
         ? buildLiquidity(entry, tech)
         : buildMomentum(entry, tech));
   } else {
+    // الكلاسيكية: الاتجاه يستعير منطق الزخم (مستويات محورية وقمم سنوية)
     built =
       strategy === "liquidity"
         ? buildLiquidity(entry, tech)
