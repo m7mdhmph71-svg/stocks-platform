@@ -174,6 +174,14 @@ export function AccountClient() {
                 >
                   {session.user.plan === "PRO" ? "احترافية" : "مجانية"}
                 </span>
+                {session.user.plan !== "PRO" ? (
+                  <Link
+                    href="/pricing"
+                    className="ms-2 text-xs text-brand-700 underline dark:text-brand-400"
+                  >
+                    عرض الخطط
+                  </Link>
+                ) : null}
               </dd>
             </div>
           </dl>

@@ -3,6 +3,8 @@ import { runYahooScreener } from "@/lib/yahoo/screener";
 import { fetchCandles } from "@/lib/yahoo/chart";
 import { fetchFundamentalsBatch } from "@/lib/yahoo/quote";
 import { cached } from "@/lib/cache";
+import { sessionUserId } from "@/lib/auth/session";
+import { limitsFor, UPGRADE_HINT_AR } from "@/lib/plan";
 import {
   BacktestResult,
   BacktestStrategy,
@@ -187,14 +189,27 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  // حدود الخطة: الزائر وغير المشترك على حدود المجانية
+  const limits = await limitsFor(await sessionUserId());
+
   const daysRaw = Number(sp.get("days") ?? DEFAULT_DAYS);
+  const requested = Number.isFinite(daysRaw) ? Math.floor(daysRaw) : DEFAULT_DAYS;
   const days = Math.max(
     5,
-    Math.min(MAX_DAYS, Number.isFinite(daysRaw) ? Math.floor(daysRaw) : DEFAULT_DAYS)
+    Math.min(MAX_DAYS, Math.min(limits.backtestMaxDays, requested))
   );
+  const clamped = requested > days;
 
   try {
     if (sp.get("compare") === "1") {
+      if (!limits.backtestCompare) {
+        return NextResponse.json(
+          {
+            error: `مقارنة صيغ الهدف/الوقف من مزايا الخطة الاحترافية — ${UPGRADE_HINT_AR}`,
+          },
+          { status: 403 }
+        );
+      }
       const res = await cached<BacktestCompareResponse>(
         `backtest:compare:${preset}:${days}`,
         60 * 60_000,
@@ -207,6 +222,15 @@ export async function GET(request: NextRequest) {
       60 * 60_000, // ساعة — نتائج الجلسات الماضية لا تتغير خلال اليوم
       () => buildBacktest(preset, days)
     );
+    if (clamped) {
+      return NextResponse.json({
+        ...res,
+        notesAr: [
+          `نافذة الخطة المجانية ${days} جلسات — الترقية للاحترافية توسعها إلى ${MAX_DAYS}.`,
+          ...res.notesAr,
+        ],
+      });
+    }
     return NextResponse.json(res);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);

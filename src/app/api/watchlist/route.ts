@@ -7,6 +7,7 @@ import { yahooJson } from "@/lib/yahoo/client";
 import { cached } from "@/lib/cache";
 import { demoRows, isDemoTicker, demoFundamentals } from "@/lib/demo/dataset";
 import { saudiNameAr } from "@/lib/saudi/companies";
+import { limitsFor, UPGRADE_HINT_AR } from "@/lib/plan";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -141,11 +142,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "رمز غير صالح." }, { status: 400 });
   }
 
+  const limits = await limitsFor(auth);
   const count = await db().watchItem.count({ where: { userId: auth } });
-  if (count >= 50) {
+  if (count >= limits.watchlistMax) {
     return NextResponse.json(
-      { error: "بلغت الحد الأقصى (50 سهماً في القائمة)." },
-      { status: 400 }
+      {
+        error: `بلغت حد خطتك (${limits.watchlistMax} سهماً في القائمة) — ${UPGRADE_HINT_AR}`,
+      },
+      { status: 403 }
     );
   }
 

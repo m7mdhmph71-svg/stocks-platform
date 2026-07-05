@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db, dbEnabled } from "@/lib/db";
 import { sessionUserId } from "@/lib/auth/session";
+import { effectivePlan } from "@/lib/plan";
 
 export const dynamic = "force-dynamic";
 
@@ -23,5 +24,12 @@ export async function GET() {
       emailVerified: true,
     },
   });
-  return NextResponse.json({ enabled: true, user });
+  if (!user) {
+    return NextResponse.json({ enabled: true, user: null });
+  }
+  // الخطة الفعلية: احترافية منتهية الصلاحية تُعرض (وتُعامل) مجانية
+  return NextResponse.json({
+    enabled: true,
+    user: { ...user, plan: await effectivePlan(userId) },
+  });
 }

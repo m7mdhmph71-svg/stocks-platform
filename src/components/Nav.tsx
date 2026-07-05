@@ -9,6 +9,7 @@ const baseLinks = [
   { href: "/", label: "الرئيسية" },
   { href: "/screener", label: "الفرز" },
   { href: "/backtest", label: "الاختبار" },
+  { href: "/pricing", label: "الخطط" },
 ];
 
 const memberLinks = [

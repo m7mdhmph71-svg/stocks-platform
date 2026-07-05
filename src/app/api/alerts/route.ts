@@ -7,6 +7,7 @@ import { fetchFundamentals } from "@/lib/yahoo/quote";
 import { screenShariah } from "@/lib/shariah/screen";
 import { ScreenerResponse, StockRow } from "@/lib/types";
 import { computePurification } from "@/lib/purification";
+import { effectivePlan } from "@/lib/plan";
 import {
   buildShariahChangeAlert,
   buildTradeNearStopAlert,
@@ -155,6 +156,8 @@ export async function GET(request: NextRequest) {
       : null;
 
   for (const user of users) {
+    // التنبيهات اللحظية والتقرير الأسبوعي من مزايا الاحترافية
+    if ((await effectivePlan(user.id)) !== "PRO") continue;
     const pref = user.notifyPref;
     const to = pref?.whatsappPhone || "self";
 

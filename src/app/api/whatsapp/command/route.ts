@@ -9,6 +9,7 @@ import { screenShariah } from "@/lib/shariah/screen";
 import { StockRow, TargetsResult } from "@/lib/types";
 import { saudiNameAr } from "@/lib/saudi/companies";
 import { computePurification } from "@/lib/purification";
+import { limitsFor } from "@/lib/plan";
 import {
   buildHelpReply,
   buildStockReply,
@@ -124,10 +125,21 @@ async function stockReply(ticker: string): Promise<string> {
   });
 }
 
-async function tradesReply(userId: string | null): Promise<string> {
+const UPGRADE_REPLY =
+  "أوامر الحساب (صفقاتي/قائمتي/تطهير) من مزايا الخطة الاحترافية — رقّ خطتك من صفحة «الخطط» في المنصة.";
+
+async function requirePro(userId: string | null): Promise<string | null> {
   if (!userId) {
     return "لم أتعرف على حسابك — احفظ رقم واتسابك في صفحة «تنبيهاتي» بالمنصة أولاً.";
   }
+  const limits = await limitsFor(userId);
+  return limits.whatsappAccountCommands ? null : UPGRADE_REPLY;
+}
+
+async function tradesReply(userId: string | null): Promise<string> {
+  const gate = await requirePro(userId);
+  if (gate) return gate;
+  if (!userId) return UPGRADE_REPLY;
   const trades = await db().trade.findMany({
     where: { userId, status: "OPEN" },
     orderBy: { openedAt: "desc" },
@@ -145,9 +157,9 @@ async function tradesReply(userId: string | null): Promise<string> {
 }
 
 async function watchlistReply(userId: string | null): Promise<string> {
-  if (!userId) {
-    return "لم أتعرف على حسابك — احفظ رقم واتسابك في صفحة «تنبيهاتي» بالمنصة أولاً.";
-  }
+  const gate = await requirePro(userId);
+  if (gate) return gate;
+  if (!userId) return UPGRADE_REPLY;
   const items = await db().watchItem.findMany({
     where: { userId },
     orderBy: { addedAt: "desc" },
@@ -192,9 +204,9 @@ async function digestReply(origin: string, market?: "sa"): Promise<string> {
 }
 
 async function purificationReply(userId: string | null): Promise<string> {
-  if (!userId) {
-    return "لم أتعرف على حسابك — احفظ رقم واتسابك في صفحة «تنبيهاتي» بالمنصة أولاً.";
-  }
+  const gate = await requirePro(userId);
+  if (gate) return gate;
+  if (!userId) return UPGRADE_REPLY;
   const trades = await db().trade.findMany({
     where: { userId, status: { not: "OPEN" } },
     orderBy: { closedAt: "desc" },

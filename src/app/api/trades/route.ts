@@ -4,6 +4,7 @@ import { sessionUserId } from "@/lib/auth/session";
 import { yahooJson } from "@/lib/yahoo/client";
 import { cached } from "@/lib/cache";
 import { demoRows, isDemoTicker } from "@/lib/demo/dataset";
+import { limitsFor, UPGRADE_HINT_AR } from "@/lib/plan";
 
 export const dynamic = "force-dynamic";
 
@@ -152,13 +153,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "الكمية يجب أن تكون موجبة." }, { status: 400 });
   }
 
+  const limits = await limitsFor(auth);
   const open = await db().trade.count({
     where: { userId: auth, status: "OPEN" },
   });
-  if (open >= 30) {
+  if (open >= limits.openTradesMax) {
     return NextResponse.json(
-      { error: "لديك 30 صفقة مفتوحة — أغلق بعضها أولاً." },
-      { status: 400 }
+      {
+        error: `بلغت حد خطتك (${limits.openTradesMax} صفقة مفتوحة) — أغلق بعضها أو ${UPGRADE_HINT_AR}`,
+      },
+      { status: 403 }
     );
   }
 
