@@ -8,6 +8,7 @@ import { computeTargets } from "@/lib/targets/engine";
 import { screenShariah } from "@/lib/shariah/screen";
 import { StockRow, TargetsResult } from "@/lib/types";
 import { saudiNameAr } from "@/lib/saudi/companies";
+import { computePurification } from "@/lib/purification";
 import {
   buildHelpReply,
   buildStockReply,
@@ -174,11 +175,12 @@ async function watchlistReply(userId: string | null): Promise<string> {
   return buildWatchlistReply(rows);
 }
 
-async function digestReply(origin: string): Promise<string> {
+async function digestReply(origin: string, market?: "sa"): Promise<string> {
   try {
     const secret = process.env.CRON_SECRET ?? "";
     const res = await fetch(
-      `${origin}/api/digest?secret=${encodeURIComponent(secret)}&dry=1`,
+      `${origin}/api/digest?secret=${encodeURIComponent(secret)}&dry=1` +
+        (market === "sa" ? "&market=sa" : ""),
       { cache: "no-store", signal: AbortSignal.timeout(280_000) }
     );
     if (!res.ok) throw new Error(String(res.status));
@@ -187,6 +189,40 @@ async function digestReply(origin: string): Promise<string> {
   } catch {
     return "تعذّر بناء ملخص اليوم الآن — حاول بعد قليل.";
   }
+}
+
+async function purificationReply(userId: string | null): Promise<string> {
+  if (!userId) {
+    return "لم أتعرف على حسابك — احفظ رقم واتسابك في صفحة «تنبيهاتي» بالمنصة أولاً.";
+  }
+  const trades = await db().trade.findMany({
+    where: { userId, status: { not: "OPEN" } },
+    orderBy: { closedAt: "desc" },
+    take: 500,
+  });
+  if (trades.length === 0) {
+    return "لا صفقات مغلقة في سجلك بعد — التطهير يُحسب من الصفقات المغلقة الرابحة.";
+  }
+  const report = await computePurification(trades);
+  const lines = [`🧼 *تطهير محفظتك* (${report.rows.length} صفقة مغلقة):`];
+  const amounts = [
+    report.totals.usd > 0 ? `$${report.totals.usd.toFixed(2)}` : null,
+    report.totals.sar > 0 ? `${report.totals.sar.toFixed(2)} ر.س` : null,
+  ].filter(Boolean);
+  if (amounts.length > 0) {
+    lines.push(`إجمالي المستحق: *${amounts.join(" + ")}* — تصدّق به.`);
+  } else {
+    lines.push("لا مبالغ تطهير مستحقة (لا أرباح محققة أو الأسهم بلا دخل محرم).");
+  }
+  if (report.totals.missingQty > 0) {
+    lines.push(`⚠️ ${report.totals.missingQty} صفقة رابحة بلا كمية — أضفها من سجل الصفقات ليكتمل الحساب.`);
+  }
+  if (report.totals.nonCompliant > 0) {
+    lines.push(`⚠️ ${report.totals.nonCompliant} صفقة على سهم غير متوافق — بعض أهل العلم يرى التصدق بكامل ربحها.`);
+  }
+  lines.push("");
+  lines.push("⚠️ حساب تقديري بمنهجية أيوفي 21 — التفاصيل في صفحة «التطهير» بالمنصة.");
+  return lines.join("\n");
 }
 
 export async function POST(request: NextRequest) {
@@ -233,6 +269,17 @@ export async function POST(request: NextRequest) {
   }
   if (/^(ملخص|الملخص|اشارات|إشارات)$/i.test(raw)) {
     return NextResponse.json({ reply: await digestReply(origin) });
+  }
+  if (/^(تداول|السعودي|السوق السعودي|ملخص سعودي)$/i.test(raw)) {
+    return NextResponse.json({ reply: await digestReply(origin, "sa") });
+  }
+  if (/^(تطهير|التطهير)$/i.test(raw)) {
+    if (!dbEnabled()) {
+      return NextResponse.json({ reply: "الحسابات غير مفعّلة على هذا النشر." });
+    }
+    return NextResponse.json({
+      reply: await purificationReply(await matchUser(from)),
+    });
   }
 
   // رمز سهم — الرقمي الخالص (مثل 2222) يُفسَّر كرمز تداول سعودي

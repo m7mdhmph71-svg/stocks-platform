@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ScreenerResponse } from "@/lib/types";
-import { buildDailyDigest } from "@/lib/whatsapp/format";
+import { buildDailyDigest, buildSaudiDigest } from "@/lib/whatsapp/format";
 import { sendWhatsApp, whatsappProvider } from "@/lib/whatsapp/send";
 
 export const dynamic = "force-dynamic";
@@ -56,12 +56,21 @@ export async function GET(request: NextRequest) {
 
   const origin = request.nextUrl.origin;
 
-  const [momentum, liquidity] = await Promise.all([
-    fetchScreener(origin, "momentum"),
-    fetchScreener(origin, "liquidity"),
-  ]);
-
-  const message = buildDailyDigest({ momentum, liquidity }, new Date());
+  // market=sa → ملخص السوق السعودي فقط (يُرسل بعد إغلاق تداول)
+  let message: string;
+  let signalsCount = 0;
+  if (request.nextUrl.searchParams.get("market") === "sa") {
+    const saudi = await fetchScreener(origin, "saudi");
+    message = buildSaudiDigest(saudi, new Date());
+    signalsCount = saudi?.total ?? 0;
+  } else {
+    const [momentum, liquidity] = await Promise.all([
+      fetchScreener(origin, "momentum"),
+      fetchScreener(origin, "liquidity"),
+    ]);
+    message = buildDailyDigest({ momentum, liquidity }, new Date());
+    signalsCount = (momentum?.total ?? 0) + (liquidity?.total ?? 0);
+  }
 
   if (dry) {
     return NextResponse.json({
@@ -81,8 +90,7 @@ export async function GET(request: NextRequest) {
       ok: result.ok,
       provider: result.provider,
       detail: result.detail,
-      signals:
-        (momentum?.total ?? 0) + (liquidity?.total ?? 0),
+      signals: signalsCount,
       message,
     },
     { status: result.ok ? 200 : 502 }

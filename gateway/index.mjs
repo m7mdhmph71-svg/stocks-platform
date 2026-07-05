@@ -42,6 +42,9 @@ const SITE_URL = (ENV.SITE_URL || "https://stocks-platform-seven.vercel.app").re
 const CRON_SECRET = ENV.CRON_SECRET || "";
 const SEND_TIME = ENV.SEND_TIME || "22:30";
 const SEND_DAYS = (ENV.SEND_DAYS || "1,2,3,4,5").split(",").map((x) => parseInt(x.trim(), 10));
+// ملخص السوق السعودي: بعد إغلاق تداول (15:10 بتوقيت الرياض)، أيام عمله الأحد-الخميس
+const SEND_TIME_SA = ENV.SEND_TIME_SA || "15:30";
+const SEND_DAYS_SA = (ENV.SEND_DAYS_SA || "7,1,2,3,4").split(",").map((x) => parseInt(x.trim(), 10));
 const SEND_TO = ENV.SEND_TO || "self";
 const PORT = parseInt(ENV.PORT || "8899", 10);
 /** فاصل سحب التنبيهات اللحظية بالدقائق */
@@ -256,7 +259,7 @@ async function handleIncoming(msg) {
 }
 
 // ---------- جلب رسالة اليوم من المنصة وإرسالها ----------
-async function runJob(reason) {
+async function runJob(reason, market) {
   try {
     if (!connected || !sock) {
       log("تخطي الإرسال: غير متصل بواتساب بعد.");
@@ -264,7 +267,8 @@ async function runJob(reason) {
     }
     log(`جلب إشارات اليوم من المنصة… (${reason})`);
     const res = await fetch(
-      `${SITE_URL}/api/digest?secret=${encodeURIComponent(CRON_SECRET)}&dry=1`,
+      `${SITE_URL}/api/digest?secret=${encodeURIComponent(CRON_SECRET)}&dry=1` +
+        (market === "sa" ? "&market=sa" : ""),
       { signal: AbortSignal.timeout(280_000) }
     );
     if (!res.ok) {
@@ -323,23 +327,35 @@ async function pollAlerts(reason) {
 
 setInterval(() => pollAlerts("دوري"), ALERT_POLL_MIN * 60_000);
 
-// ---------- الجدولة اليومية ----------
+// ---------- الجدولة اليومية (الأمريكي + السعودي) ----------
 const SENT_FILE = join(ROOT, "last-sent.txt");
+const SENT_FILE_SA = join(ROOT, "last-sent-sa.txt");
 function todayKey() {
   const d = new Date();
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 }
-setInterval(async () => {
-  const now = new Date();
+function dueNow(now, time, days) {
   const hh = String(now.getHours()).padStart(2, "0");
   const mm = String(now.getMinutes()).padStart(2, "0");
   const day = now.getDay() === 0 ? 7 : now.getDay(); // الأحد=7
-  if (`${hh}:${mm}` !== SEND_TIME) return;
-  if (!SEND_DAYS.includes(day)) return;
-  const already = existsSync(SENT_FILE) && readFileSync(SENT_FILE, "utf8") === todayKey();
-  if (already) return;
-  writeFileSync(SENT_FILE, todayKey());
-  await runJob(`الجدولة اليومية ${SEND_TIME}`);
+  return `${hh}:${mm}` === time && days.includes(day);
+}
+setInterval(async () => {
+  const now = new Date();
+  if (dueNow(now, SEND_TIME, SEND_DAYS)) {
+    const already = existsSync(SENT_FILE) && readFileSync(SENT_FILE, "utf8") === todayKey();
+    if (!already) {
+      writeFileSync(SENT_FILE, todayKey());
+      await runJob(`الجدولة اليومية ${SEND_TIME}`);
+    }
+  }
+  if (dueNow(now, SEND_TIME_SA, SEND_DAYS_SA)) {
+    const already = existsSync(SENT_FILE_SA) && readFileSync(SENT_FILE_SA, "utf8") === todayKey();
+    if (!already) {
+      writeFileSync(SENT_FILE_SA, todayKey());
+      await runJob(`ملخص السوق السعودي ${SEND_TIME_SA}`, "sa");
+    }
+  }
 }, 20_000);
 
 // ---------- خادم HTTP: واجهة JSON للمنصة + صفحة الحالة ----------
@@ -438,7 +454,7 @@ createServer(async (req, res) => {
     : connected
       ? `<p style="color:#15855c;font-size:1.3rem">✅ متصل بواتساب (${selfJid ?? ""})</p>
          <form method="post" action="/test"><button style="font-size:1rem;padding:.6rem 1.4rem;border-radius:.7rem;border:0;background:#15855c;color:#fff;cursor:pointer">أرسل رسالة الإشارات الآن (تجربة)</button></form>
-         <p>الإرسال المجدول: ${SEND_TIME} أيام (${SEND_DAYS.join(",")}) إلى ${SEND_TO === "self" ? "حسابك نفسه" : SEND_TO}</p>
+         <p>الإرسال المجدول: الأمريكي ${SEND_TIME} أيام (${SEND_DAYS.join(",")}) · السعودي ${SEND_TIME_SA} أيام (${SEND_DAYS_SA.join(",")}) إلى ${SEND_TO === "self" ? "حسابك نفسه" : SEND_TO}</p>
          <p>سحب التنبيهات اللحظية: كل ${ALERT_POLL_MIN} دقائق</p>`
       : `<p>⏳ جارٍ الاتصال… إن ظهر رمز QR في نافذة الأوامر فامسحه، أو حدّث هذه الصفحة.</p>
          <script>setTimeout(()=>location.reload(), 5000)</script>`;

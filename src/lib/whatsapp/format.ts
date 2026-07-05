@@ -217,6 +217,10 @@ export interface WeeklyStats {
   best: { ticker: string; pnl: number } | null;
   worst: { ticker: string; pnl: number } | null;
   open: number;
+  /** مبلغ التطهير المستحق عن صفقات الأسبوع بالدولار (null = لا يُعرض) */
+  purificationUsd?: number | null;
+  /** مبلغ التطهير المستحق بالريال (صفقات تداول) */
+  purificationSar?: number | null;
 }
 
 export function buildWeeklyReport(s: WeeklyStats, now: Date): string {
@@ -235,9 +239,59 @@ export function buildWeeklyReport(s: WeeklyStats, now: Date): string {
     if (s.best) parts.push(`أفضل صفقة: ${s.best.ticker} ${fmtPct(s.best.pnl)}`);
     if (s.worst) parts.push(`أسوأ صفقة: ${s.worst.ticker} ${fmtPct(s.worst.pnl)}`);
     if (s.open > 0) parts.push(`الصفقات المفتوحة الآن: ${s.open}`);
+    const purUsd = s.purificationUsd ?? 0;
+    const purSar = s.purificationSar ?? 0;
+    if (purUsd > 0 || purSar > 0) {
+      const amounts = [
+        purUsd > 0 ? fmtMoney(purUsd) : null,
+        purSar > 0 ? fmtMoney(purSar, "ر.س") : null,
+      ]
+        .filter(Boolean)
+        .join(" + ");
+      parts.push(`🧼 مبلغ التطهير المستحق عن صفقات الأسبوع: ${amounts} — تصدّق به.`);
+    }
   }
   parts.push("");
   parts.push(DISCLAIMER);
+  return parts.join("\n");
+}
+
+/** ملخص السوق السعودي اليومي — يُرسل بعد إغلاق تداول */
+export function buildSaudiDigest(
+  saudi: ScreenerResponse | null,
+  now: Date
+): string {
+  const dateAr = now.toLocaleDateString("ar-u-nu-latn", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const parts: string[] = [];
+  parts.push(`📊 *سهم سكرينر — السوق السعودي اليوم*`);
+  parts.push(dateAr);
+  parts.push("");
+
+  if (!saudi || saudi.source === "demo") {
+    parts.push("تعذّر جلب بيانات تداول الحية اليوم.");
+  } else if (saudi.rows.length === 0) {
+    parts.push("لا إشارات زخم في تداول اليوم — الفلاتر الانتقائية تصمت أحياناً، وقد يكون السوق مغلقاً.");
+  } else {
+    const rows = saudi.rows.slice(0, MAX_PER_FILTER);
+    parts.push(
+      `🇸🇦 *زخم تداول* (${saudi.total} ${saudi.total === 1 ? "إشارة" : "إشارات"}${
+        saudi.total > rows.length ? ` — أقوى ${rows.length}` : ""
+      }):`
+    );
+    rows.forEach((r, i) => parts.push(signalBlock(r, i + 1)));
+    parts.push("");
+    parts.push("📌 جلسة تداول القادمة: الأحد–الخميس 10:00–15:10 بتوقيت الرياض.");
+  }
+
+  parts.push("");
+  parts.push("⚠️ فرز آلي — ليست توصية استثمارية، والفحص الشرعي تقديري.");
+  parts.push(`التفاصيل والرسوم: ${SITE_URL}/screener?preset=saudi`);
   return parts.join("\n");
 }
 
@@ -248,10 +302,12 @@ export function buildWeeklyReport(s: WeeklyStats, now: Date): string {
 export function buildHelpReply(): string {
   return [
     `🤖 *أوامر سهم سكرينر عبر واتساب:*`,
-    `• أرسل رمز سهم (مثل AAPL) → تحليل فوري: الحكم الشرعي والأهداف والوقف`,
+    `• أرسل رمز سهم (مثل AAPL أو 2222) → تحليل فوري: الحكم الشرعي والأهداف والوقف`,
     `• *صفقاتي* → صفقاتك المفتوحة مع أسعارها الآن`,
     `• *قائمتي* → قائمة متابعتك بالأسعار والأحكام`,
-    `• *ملخص* → إشارات اليوم كاملة الآن`,
+    `• *ملخص* → إشارات السوق الأمريكي اليوم`,
+    `• *تداول* → إشارات السوق السعودي اليوم`,
+    `• *تطهير* → مبلغ التطهير المستحق عن صفقاتك`,
     `• *مساعدة* → هذه الرسالة`,
     "",
     DISCLAIMER,

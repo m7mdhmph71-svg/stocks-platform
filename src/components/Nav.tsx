@@ -14,6 +14,7 @@ const baseLinks = [
 const memberLinks = [
   { href: "/watchlist", label: "قائمتي" },
   { href: "/trades", label: "صفقاتي" },
+  { href: "/purification", label: "التطهير" },
   { href: "/whatsapp", label: "تنبيهاتي" },
 ];
 

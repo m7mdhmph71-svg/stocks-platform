@@ -6,6 +6,7 @@ import { batchQuotes } from "@/lib/yahoo/batchQuotes";
 import { fetchFundamentals } from "@/lib/yahoo/quote";
 import { screenShariah } from "@/lib/shariah/screen";
 import { ScreenerResponse, StockRow } from "@/lib/types";
+import { computePurification } from "@/lib/purification";
 import {
   buildShariahChangeAlert,
   buildTradeNearStopAlert,
@@ -287,6 +288,8 @@ export async function GET(request: NextRequest) {
           }));
         const wins = pnls.filter((p) => p.pnl > 0).length;
         const sorted = pnls.slice().sort((a, b) => b.pnl - a.pnl);
+        // مبلغ التطهير المستحق عن صفقات الأسبوع (القوائم مخبأة — كلفة منخفضة)
+        const purification = await computePurification(closed).catch(() => null);
         candidates.push({
           userId: user.id,
           to,
@@ -304,6 +307,8 @@ export async function GET(request: NextRequest) {
               best: sorted[0] ?? null,
               worst: sorted.length > 1 ? sorted[sorted.length - 1] : null,
               open: openCount,
+              purificationUsd: purification?.totals.usd ?? null,
+              purificationSar: purification?.totals.sar ?? null,
             },
             now
           ),
