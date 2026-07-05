@@ -22,9 +22,43 @@ function emptySnapshot(): TechnicalSnapshot {
     high52w: null,
     low52w: null,
     pivot: null,
+    swingLows: [],
+    swingHighs: [],
     weekPerfPercent: null,
     monthPerfPercent: null,
   };
+}
+
+/**
+ * القيعان/القمم المتأرجحة (fractal بعرض k): قاع أدنى من k شموع على كل جانب
+ * (والقمة بعكسه) ضمن آخر window شمعة. تُعاد بترتيب زمني تصاعدي.
+ * آخر k شموع لا يمكن تأكيد تأرجحها بعد — وهذا مقصود (لا تسريب مستقبلي).
+ */
+function findSwings(
+  candles: Candle[],
+  k = 2,
+  window = 120,
+  maxCount = 10
+): { lows: number[]; highs: number[] } {
+  const start = Math.max(k, candles.length - window);
+  const lows: number[] = [];
+  const highs: number[] = [];
+  for (let i = start; i < candles.length - k; i++) {
+    let isLow = true;
+    let isHigh = true;
+    for (let j = 1; j <= k; j++) {
+      if (candles[i].low >= candles[i - j].low || candles[i].low >= candles[i + j].low) {
+        isLow = false;
+      }
+      if (candles[i].high <= candles[i - j].high || candles[i].high <= candles[i + j].high) {
+        isHigh = false;
+      }
+      if (!isLow && !isHigh) break;
+    }
+    if (isLow) lows.push(candles[i].low);
+    if (isHigh) highs.push(candles[i].high);
+  }
+  return { lows: lows.slice(-maxCount), highs: highs.slice(-maxCount) };
 }
 
 /** RSI بطريقة Wilder: أول متوسط ربح/خسارة بسيط لأول 14 تغيراً ثم تمهيد */
@@ -137,6 +171,7 @@ export function computeTechnicals(candles: Candle[]): TechnicalSnapshot {
 
   const fifty = windowHighLow(cs, 50, 50);
   const yearly = windowHighLow(cs, 252, 200);
+  const swings = findSwings(cs);
 
   return {
     rsi14: wilderRsi(closes, 14),
@@ -149,6 +184,8 @@ export function computeTechnicals(candles: Candle[]): TechnicalSnapshot {
     high52w: yearly.high,
     low52w: yearly.low,
     pivot,
+    swingLows: swings.lows,
+    swingHighs: swings.highs,
     weekPerfPercent: perfPercent(closes, 5),
     monthPerfPercent: perfPercent(closes, 21),
   };

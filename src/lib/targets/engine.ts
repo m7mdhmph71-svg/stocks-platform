@@ -1,14 +1,26 @@
 // ============================================================
 // محرك الأهداف والتوقعات — دوال نقية حتمية (بلا أي جلب بيانات).
 //
-// منطق الأهداف لكل استراتيجية (entry = السعر الحالي):
-//  - liquidity: T1 = entry + 1×ATR، T2 = entry + 2×ATR،
-//    T3 = الأدنى من (R2، قمة 50 يوماً)؛ الوقف = entry − 1.5×ATR أو تحت S1
-//    أيهما أقرب حماية (الأعلى تحت سعر الدخول).
-//  - momentum: T1 = R1، T2 = R2، T3 = قمة 52 أسبوعاً إن كانت أعلى وإلا R3؛
-//    الوقف = أسفل SMA20 أو entry − 2×ATR أيهما أعلى (أقرب للسعر).
-//  - longterm: T1 = هدف المحللين إن توفر وإلا entry × 1.15،
-//    T2 = entry × 1.25، T3 = قمة 52 أسبوعاً × 1.10؛ الوقف = SMA200.
+// صيغتان للمضاربة (liquidity/momentum):
+//
+// «الهيكلية» structure — الافتراضية (معيار التداول الاحترافي المستقر):
+//  - الوقف: تحت آخر قاع متأرجح فعلي في الشارت (بهامش ربع ATR)، بشرط
+//    مسافة معقولة (0.75×ATR حتى 2.5×ATR من الدخول) — السوق يحترم
+//    القيعان الفعلية أكثر من المعادلات المجردة. عند غيابها: مرشحات
+//    الصيغة الكلاسيكية.
+//  - الأهداف: أقرب مستويات فعلية (قمم متأرجحة، محاور R1-R3، قمم
+//    50ي/52أ) مع حارس مضاعف المخاطرة: الهدف الأول لا يقل عن 1×
+//    المخاطرة، والثاني عن 2× — فلا تُقترح صفقة عائدها أقل من مخاطرتها.
+//
+// «الكلاسيكية» classic — الصيغة السابقة (ATR والمحاور) تُستبقى للمقارنة
+// في الاختبار التاريخي:
+//  - liquidity: T1/T2 = ATR×1/×2، T3 = الأدنى من (R2، قمة 50ي)؛
+//    الوقف = 1.5×ATR أو تحت S1 أيهما أعلى.
+//  - momentum: T1/T2 = R1/R2، T3 = قمة 52أ أو R3؛ الوقف = تحت SMA20
+//    أو 2×ATR أيهما أعلى.
+//
+//  - longterm (صيغة واحدة): T1 = هدف المحللين وإلا ×1.15، T2 = ×1.25،
+//    T3 = قمة 52أ ×1.10؛ الوقف = SMA200.
 //
 // عند غياب بيانات فنية تُستبدل مستويات نسبية موثّقة في basisAr،
 // وتُضمن أهداف تصاعدية فوق سعر الدخول (أي مستوى دونه يُعدَّل بأقل
@@ -49,6 +61,9 @@ function isPos(x: number | null | undefined): x is number {
 }
 
 const TARGET_LABELS = ["الهدف الأول", "الهدف الثاني", "الهدف الثالث"] as const;
+
+/** صيغة حساب الأهداف/الوقف للمضاربة — الهيكلية هي الافتراضية */
+export type TargetFormula = "structure" | "classic";
 
 /**
  * ضمان أهداف تصاعدية حصراً فوق سعر الدخول: أي مستوى خام دون المستوى
@@ -93,6 +108,112 @@ function pickStop(
   }
   const chosen = best ?? fallback;
   return { price: roundPrice(chosen.price), basisAr: chosen.basisAr };
+}
+
+/**
+ * وقف بنية السوق: تحت أعلى قاع متأرجح تحت سعر الدخول بهامش ربع ATR،
+ * بشرط ألا يكون خانقاً (< 0.75×ATR) ولا بعيداً مبدداً (> 2.5×ATR).
+ * تُجرَّب القيعان من الأعلى إلى الأدنى حتى يصح الشرط.
+ */
+function structuralStop(
+  entry: number,
+  atr: number,
+  swingLows: number[]
+): RawStop | null {
+  const below = swingLows
+    .filter((sl) => sl > 0 && sl < entry)
+    .sort((a, b) => b - a);
+  for (const sl of below) {
+    const price = sl - 0.25 * atr;
+    if (price <= 0) continue;
+    const dist = entry - price;
+    if (dist < 0.75 * atr) continue; // خانق — جرّب القاع الأدنى التالي
+    if (dist > 2.5 * atr) break; // القيعان الأدنى ستكون أبعد — لا جدوى
+    return {
+      price: roundPrice(price),
+      basisAr: "تحت آخر قاع متأرجح فعلي في الشارت بهامش ربع ATR (بنية السوق)",
+    };
+  }
+  return null;
+}
+
+/**
+ * الصيغة الهيكلية للمضاربة: مستويات فعلية + حارس مضاعف المخاطرة.
+ * تعيد null عند غياب ATR — فيسقط الحساب للصيغة الكلاسيكية.
+ */
+function buildStructured(
+  strategy: "liquidity" | "momentum",
+  entry: number,
+  t: TechnicalSnapshot
+): { targets: RawTarget[]; stop: RawStop } | null {
+  const atr = isPos(t.atr14) ? t.atr14 : null;
+  if (atr === null) return null;
+
+  // ١) الوقف: بنية السوق أولاً، ثم مرشحات الصيغة الكلاسيكية
+  const classic =
+    strategy === "liquidity" ? buildLiquidity(entry, t) : buildMomentum(entry, t);
+  const stop = structuralStop(entry, atr, t.swingLows) ?? classic.stop;
+  if (!(stop.price > 0 && stop.price < entry)) return null;
+  const risk = entry - stop.price;
+
+  // ٢) مرشحات الأهداف: مستويات فعلية مرتبة تصاعدياً فوق الدخول
+  const cands: RawTarget[] = [];
+  for (const sh of t.swingHighs) {
+    if (sh > entry) {
+      cands.push({ price: sh, basisAr: "قمة متأرجحة سابقة (مقاومة بنية السوق)" });
+    }
+  }
+  const piv = t.pivot;
+  if (piv) {
+    if (isPos(piv.r1) && piv.r1 > entry) cands.push({ price: piv.r1, basisAr: "المقاومة المحورية الأولى R1" });
+    if (isPos(piv.r2) && piv.r2 > entry) cands.push({ price: piv.r2, basisAr: "المقاومة المحورية الثانية R2" });
+    if (isPos(piv.r3) && piv.r3 > entry) cands.push({ price: piv.r3, basisAr: "المقاومة المحورية الثالثة R3" });
+  }
+  if (isPos(t.high50d) && t.high50d > entry) {
+    cands.push({ price: t.high50d, basisAr: "قمة 50 يوماً" });
+  }
+  if (isPos(t.high52w) && t.high52w > entry) {
+    cands.push({ price: t.high52w, basisAr: "قمة 52 أسبوعاً" });
+  }
+  cands.sort((a, b) => a.price - b.price);
+  // إزالة المستويات المتلاصقة (أقرب من ربع ATR) — نبقي الأقرب للدخول
+  const merged: RawTarget[] = [];
+  for (const c of cands) {
+    const last = merged[merged.length - 1];
+    if (last && c.price - last.price < 0.25 * atr) continue;
+    merged.push(c);
+  }
+
+  // ٣) اختيار الأهداف بحارس مضاعف المخاطرة (فوق حد أدنى يمنع أهدافاً صورية)
+  const pickAbove = (floor: number): RawTarget | null =>
+    merged.find((c) => c.price >= floor) ?? null;
+
+  const t1Floor = entry + Math.max(risk, 0.5 * atr);
+  const rawT1 =
+    pickAbove(t1Floor) ??
+    ({ price: entry + Math.max(risk, atr), basisAr: "مضاعف المخاطرة ×1 (لا مقاومة فعلية أقرب)" } as RawTarget);
+  const t1: RawTarget = {
+    price: rawT1.price,
+    basisAr: `${rawT1.basisAr} — أول مستوى يحقق عائد/مخاطرة ≥ 1`,
+  };
+
+  const t2Floor = Math.max(t1.price + 0.5 * atr, entry + 2 * risk);
+  const rawT2 =
+    pickAbove(t2Floor) ??
+    ({ price: entry + Math.max(2 * risk, 2 * atr), basisAr: "مضاعف المخاطرة ×2 (لا مقاومة فعلية أقرب)" } as RawTarget);
+  const t2: RawTarget = {
+    price: rawT2.price,
+    basisAr: `${rawT2.basisAr} — يحقق عائد/مخاطرة ≥ 2`,
+  };
+
+  const t3Floor = t2.price + 0.5 * atr;
+  const rawT3 =
+    pickAbove(t3Floor) ??
+    (isPos(t.high52w) && t.high52w > t3Floor
+      ? ({ price: t.high52w, basisAr: "قمة 52 أسبوعاً" } as RawTarget)
+      : ({ price: entry + Math.max(3 * risk, 3 * atr), basisAr: "مضاعف المخاطرة ×3 (امتداد الحركة)" } as RawTarget));
+
+  return { targets: [t1, t2, rawT3], stop };
 }
 
 function buildLiquidity(
@@ -366,7 +487,8 @@ export function computeTargets(
   strategy: StrategyKey,
   entry: number,
   tech: TechnicalSnapshot,
-  analystTarget?: number | null
+  analystTarget?: number | null,
+  formula: TargetFormula = "structure"
 ): TargetsResult {
   const strategyAr = STRATEGY_NAMES_AR[strategy];
 
@@ -389,12 +511,22 @@ export function computeTargets(
   }
 
   const at = analystTarget ?? null;
-  const built =
-    strategy === "liquidity"
-      ? buildLiquidity(entry, tech)
-      : strategy === "momentum"
-        ? buildMomentum(entry, tech)
-        : buildLongterm(entry, tech, at);
+  let built: { targets: RawTarget[]; stop: RawStop };
+  if (strategy === "longterm") {
+    built = buildLongterm(entry, tech, at);
+  } else if (formula === "structure") {
+    // الهيكلية أولاً — وعند غياب ATR تسقط للكلاسيكية تلقائياً
+    built =
+      buildStructured(strategy, entry, tech) ??
+      (strategy === "liquidity"
+        ? buildLiquidity(entry, tech)
+        : buildMomentum(entry, tech));
+  } else {
+    built =
+      strategy === "liquidity"
+        ? buildLiquidity(entry, tech)
+        : buildMomentum(entry, tech);
+  }
 
   const targets = normalizeTargets(entry, built.targets);
   const stopLoss = built.stop.price;

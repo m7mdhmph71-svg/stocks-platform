@@ -8,7 +8,10 @@ import Link from "next/link";
 import { fetchJson, fmtShortDateAr } from "@/components/ui";
 import { fmtPercent, fmtPrice, changeColorClass } from "@/lib/format";
 import { ErrorBox } from "@/components/States";
-import type { BacktestResponse } from "@/app/api/backtest/route";
+import type {
+  BacktestCompareResponse,
+  BacktestResponse,
+} from "@/app/api/backtest/route";
 
 type Strategy = "liquidity" | "momentum";
 
@@ -94,6 +97,8 @@ export function BacktestPanel() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ranFor, setRanFor] = useState<string | null>(null);
+  const [compare, setCompare] = useState<BacktestCompareResponse | null>(null);
+  const [comparing, setComparing] = useState(false);
 
   const run = useCallback(() => {
     setLoading(true);
@@ -109,6 +114,20 @@ export function BacktestPanel() {
         setError(e instanceof Error ? e.message : "تعذّر تنفيذ الاختبار.");
       })
       .finally(() => setLoading(false));
+  }, [strategy, days]);
+
+  const runCompare = useCallback(() => {
+    setComparing(true);
+    setError(null);
+    setCompare(null);
+    fetchJson<BacktestCompareResponse>(
+      `/api/backtest?preset=${strategy}&days=${days}&compare=1`
+    )
+      .then(setCompare)
+      .catch((e: unknown) => {
+        setError(e instanceof Error ? e.message : "تعذّرت المقارنة.");
+      })
+      .finally(() => setComparing(false));
   }, [strategy, days]);
 
   return (
@@ -156,16 +175,142 @@ export function BacktestPanel() {
         <button
           type="button"
           onClick={run}
-          disabled={loading}
+          disabled={loading || comparing}
           className="rounded-lg bg-brand-600 px-4 py-1.5 text-sm font-bold text-white transition-colors hover:bg-brand-700 disabled:opacity-50"
         >
           {loading ? "جارٍ الاختبار…" : "شغّل الاختبار"}
+        </button>
+        <button
+          type="button"
+          onClick={runCompare}
+          disabled={loading || comparing}
+          className="rounded-lg border border-brand-500 px-4 py-1.5 text-sm font-bold text-brand-700 transition-colors hover:bg-brand-50 disabled:opacity-50 dark:text-brand-400 dark:hover:bg-brand-950/40"
+        >
+          {comparing ? "جارٍ المقارنة…" : "⚖️ قارن صيغ الهدف/الوقف"}
         </button>
         <span className="text-xs text-zinc-400 dark:text-zinc-500">
           فلتر الاستثمار غير قابل للاختبار التاريخي (يتطلب قوائم مالية «كما
           كانت» — غير متاحة مجاناً).
         </span>
       </div>
+
+      {comparing ? (
+        <div className="rounded-xl border border-zinc-200 p-6 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+          <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-brand-500 border-t-transparent align-middle" />{" "}
+          نحاكي كل إشارة بأربع صيغ خروج مختلفة — قد يستغرق دقيقة أول مرة.
+        </div>
+      ) : null}
+
+      {compare && !comparing ? (
+        <div className="space-y-3">
+          <div>
+            <h3 className="font-bold text-zinc-900 dark:text-zinc-50">
+              أي صيغة هدف/وقف كانت الأفضل؟
+            </h3>
+            <p className="mt-1 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
+              نفس {compare.totalSignals} إشارة عبر {compare.daysTested} جلسة،
+              حوكيت بأربع طرق خروج — القرار بالأرقام لا بالانطباع.
+            </p>
+          </div>
+          <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-zinc-200 bg-zinc-50 text-xs text-zinc-500 dark:border-zinc-800 dark:bg-zinc-800/60 dark:text-zinc-400">
+                  <th className="p-2.5 text-start font-medium">الصيغة</th>
+                  <th className="p-2.5 text-end font-medium">صفقات محسومة</th>
+                  <th className="p-2.5 text-end font-medium">نسبة رابحة</th>
+                  <th className="p-2.5 text-end font-medium">متوسط العائد</th>
+                  <th className="p-2.5 text-end font-medium">معامل الربح</th>
+                  <th className="p-2.5 text-end font-medium">متوسط الجلسات</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(() => {
+                  const bestPf = Math.max(
+                    ...compare.variants.map((v) => v.profitFactor ?? -Infinity)
+                  );
+                  return compare.variants.map((v) => {
+                    const isBest =
+                      v.profitFactor !== null && v.profitFactor === bestPf;
+                    return (
+                      <tr
+                        key={v.key}
+                        className={
+                          "border-b border-zinc-100 last:border-0 dark:border-zinc-800/60 " +
+                          (isBest ? "bg-emerald-50/60 dark:bg-emerald-950/30" : "")
+                        }
+                      >
+                        <td className="p-2.5">
+                          <span className="font-bold text-zinc-900 dark:text-zinc-50">
+                            {v.labelAr}
+                          </span>
+                          {isBest ? (
+                            <span className="ms-2 rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white">
+                              الأفضل
+                            </span>
+                          ) : null}
+                          {v.key === "structure" ? (
+                            <span className="ms-2 rounded-full bg-zinc-200 px-2 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
+                              المعتمدة حالياً
+                            </span>
+                          ) : null}
+                          <span className="block text-xs text-zinc-500 dark:text-zinc-400">
+                            {v.descriptionAr}
+                          </span>
+                        </td>
+                        <td className="p-2.5 text-end tabular-nums text-zinc-700 dark:text-zinc-200">
+                          {v.closedTrades}
+                        </td>
+                        <td className="p-2.5 text-end tabular-nums text-zinc-700 dark:text-zinc-200">
+                          {v.winRate !== null ? v.winRate.toFixed(0) + "%" : "—"}
+                        </td>
+                        <td
+                          className={
+                            "p-2.5 text-end font-bold tabular-nums " +
+                            changeColorClass(v.avgTradeReturn)
+                          }
+                        >
+                          <span dir="ltr">{fmtPercent(v.avgTradeReturn)}</span>
+                        </td>
+                        <td
+                          className={
+                            "p-2.5 text-end tabular-nums " +
+                            (v.profitFactor !== null
+                              ? v.profitFactor >= 1
+                                ? "text-emerald-600 dark:text-emerald-400"
+                                : "text-red-600 dark:text-red-400"
+                              : "")
+                          }
+                        >
+                          {v.profitFactor !== null
+                            ? v.profitFactor.toFixed(2)
+                            : "—"}
+                        </td>
+                        <td className="p-2.5 text-end tabular-nums text-zinc-600 dark:text-zinc-300">
+                          {v.avgSessionsHeld !== null
+                            ? v.avgSessionsHeld.toFixed(1)
+                            : "—"}
+                        </td>
+                      </tr>
+                    );
+                  });
+                })()}
+              </tbody>
+            </table>
+          </div>
+          <ul className="space-y-1">
+            {compare.notesAr.map((n, i) => (
+              <li
+                key={i}
+                className="flex gap-2 text-xs text-zinc-500 dark:text-zinc-400"
+              >
+                <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-amber-500" />
+                {n}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       {loading ? (
         <div className="rounded-xl border border-zinc-200 p-6 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">

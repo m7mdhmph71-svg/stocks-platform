@@ -129,6 +129,13 @@ export interface TechnicalSnapshot {
     s2: number;
     s3: number;
   } | null;
+  /**
+   * قيعان متأرجحة حديثة (fractal: قاع أدنى من جيرانه) بترتيب زمني تصاعدي —
+   * أساس أوقاف «بنية السوق»: السوق يحترم القيعان الفعلية لا المعادلات.
+   */
+  swingLows: number[];
+  /** قمم متأرجحة حديثة بترتيب زمني تصاعدي — مقاومات فعلية لأهداف بنية السوق */
+  swingHighs: number[];
   weekPerfPercent: number | null;
   monthPerfPercent: number | null;
 }

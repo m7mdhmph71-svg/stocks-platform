@@ -301,6 +301,247 @@ export function summarizeBacktest(
   };
 }
 
+// ============================================================
+// مقارنة صيغ الهدف/الوقف — نفس الإشارات، أربع طرق خروج:
+//   classic   الصيغة الكلاسيكية (ATR والمحاور — صيغة المنصة السابقة)
+//   structure الصيغة الهيكلية (قيعان متأرجحة + حارس مضاعف المخاطرة)
+//   trail     وقف هيكلي ثم متحرك Chandelier (أعلى قمة − 3×ATR) بلا هدف ثابت
+//   hybrid    نصف الكمية عند الهدف الأول + النصف الباقي بوقف متحرك
+//             لا ينزل تحت سعر الدخول — خطة المنصة المنصوح بها نصاً
+// ============================================================
+
+export type ExitFormulaKey = "classic" | "structure" | "trail" | "hybrid";
+
+export interface VariantSummary {
+  key: ExitFormulaKey;
+  labelAr: string;
+  descriptionAr: string;
+  closedTrades: number;
+  /** نسبة الصفقات الرابحة % */
+  winRate: number | null;
+  avgTradeReturn: number | null;
+  profitFactor: number | null;
+  avgSessionsHeld: number | null;
+}
+
+export const VARIANT_META: Record<
+  ExitFormulaKey,
+  { labelAr: string; descriptionAr: string }
+> = {
+  classic: {
+    labelAr: "الكلاسيكية",
+    descriptionAr: "ATR والنقاط المحورية — صيغة المنصة السابقة",
+  },
+  structure: {
+    labelAr: "الهيكلية",
+    descriptionAr:
+      "وقف تحت آخر قاع متأرجح + أهداف على مستويات فعلية بحارس عائد/مخاطرة",
+  },
+  trail: {
+    labelAr: "الوقف المتحرك",
+    descriptionAr: "وقف هيكلي يتحول لمتحرك (أعلى قمة − 3×ATR) بلا هدف ثابت",
+  },
+  hybrid: {
+    labelAr: "الهجينة",
+    descriptionAr:
+      "نصف الكمية عند الهدف الأول والباقي بوقف متحرك لا ينزل تحت الدخول",
+  },
+};
+
+interface SimOutcome {
+  ret: number;
+  sessions: number;
+}
+
+/** الوقف المتحرك Chandelier: يُحدَّث من قمم الجلسات السابقة فقط (لا تفاؤل لحظي) */
+function simulateTrailExit(
+  candles: Candle[],
+  i: number,
+  entry: number,
+  stop0: number,
+  atr: number,
+  horizonEnd: number,
+  stopFloor: number | null
+): SimOutcome | null {
+  let trail = stop0;
+  let maxHigh = candles[i].high;
+
+  for (let j = i + 1; j <= horizonEnd; j++) {
+    const c = candles[j];
+    // وقف الجلسة من بيانات ما قبلها
+    let level = Math.max(trail, maxHigh - 3 * atr);
+    if (stopFloor !== null) level = Math.max(level, stopFloor);
+
+    if (c.open <= level) {
+      return { ret: pct(c.open, entry), sessions: j - i };
+    }
+    if (c.low <= level) {
+      return { ret: pct(level, entry), sessions: j - i };
+    }
+    trail = level;
+    if (c.high > maxHigh) maxHigh = c.high;
+  }
+
+  if (horizonEnd < candles.length - 1 || i + TRADE_HORIZON <= candles.length - 1) {
+    return { ret: pct(candles[horizonEnd].close, entry), sessions: horizonEnd - i };
+  }
+  return null; // الأفق لم يكتمل — صفقة جارية تُستثنى من المقارنة
+}
+
+/** خروج بخطة ثابتة (هدف/وقف) — نسخة مختصرة تعيد null للجارية */
+function simulateFixedExit(
+  candles: Candle[],
+  i: number,
+  entry: number,
+  target: number,
+  stop: number
+): SimOutcome | null {
+  const sim = simulateTrade(candles, i, entry, target, stop);
+  if (sim.outcome === "open" || sim.tradeReturnPercent === null) return null;
+  return { ret: sim.tradeReturnPercent, sessions: sim.sessionsHeld ?? 0 };
+}
+
+/** الهجينة: نصف عند الهدف الأول، والباقي بوقف متحرك أرضيته سعر الدخول */
+function simulateHybridExit(
+  candles: Candle[],
+  i: number,
+  entry: number,
+  target: number,
+  stop: number,
+  atr: number
+): SimOutcome | null {
+  const lastIndex = candles.length - 1;
+  const end = Math.min(i + TRADE_HORIZON, lastIndex);
+
+  for (let j = i + 1; j <= end; j++) {
+    const c = candles[j];
+    // الوقف يُغلَّب تحفظاً (نفس قواعد الخطة الثابتة)
+    if (c.open <= stop) return { ret: pct(c.open, entry), sessions: j - i };
+    if (c.low <= stop) return { ret: pct(stop, entry), sessions: j - i };
+
+    const t1Price = c.open >= target ? c.open : c.high >= target ? target : null;
+    if (t1Price !== null) {
+      // تحقق الهدف الأول: نصف يُجنى الآن، والباقي بوقف متحرك من الجلسة التالية
+      const half1 = pct(t1Price, entry);
+      const rest = simulateTrailExit(
+        candles,
+        j,
+        entry,
+        Math.max(stop, entry),
+        atr,
+        end,
+        entry // «ارفع الوقف لسعر الدخول» — لا ينزل تحته
+      );
+      if (rest === null) return null; // الباقي جارٍ — الصفقة كلها تُستثنى
+      return {
+        ret: (half1 + rest.ret) / 2,
+        sessions: Math.max(j - i, rest.sessions + (j - i)),
+      };
+    }
+  }
+
+  if (i + TRADE_HORIZON <= lastIndex) {
+    return { ret: pct(candles[end].close, entry), sessions: end - i };
+  }
+  return null;
+}
+
+function summarizeVariant(
+  key: ExitFormulaKey,
+  outcomes: SimOutcome[]
+): VariantSummary {
+  const rets = outcomes.map((o) => o.ret);
+  const wins = rets.filter((r) => r > 0);
+  const gains = wins.reduce((a, b) => a + b, 0);
+  const losses = rets.filter((r) => r < 0).reduce((a, b) => a + b, 0);
+  const sessions = outcomes.map((o) => o.sessions);
+  return {
+    key,
+    ...VARIANT_META[key],
+    closedTrades: outcomes.length,
+    winRate: outcomes.length > 0 ? (wins.length / outcomes.length) * 100 : null,
+    avgTradeReturn:
+      rets.length > 0 ? rets.reduce((a, b) => a + b, 0) / rets.length : null,
+    profitFactor: losses < 0 ? gains / Math.abs(losses) : null,
+    avgSessionsHeld:
+      sessions.length > 0
+        ? sessions.reduce((a, b) => a + b, 0) / sessions.length
+        : null,
+  };
+}
+
+export interface FormulaComparison {
+  strategy: BacktestStrategy;
+  totalSignals: number;
+  daysTested: number;
+  variants: VariantSummary[];
+}
+
+/** يقارن صيغ الخروج الأربع على نفس إشارات الفترة */
+export function runFormulaComparison(
+  strategy: BacktestStrategy,
+  series: { ticker: string; name: string; candles: Candle[] }[],
+  daysBack: number
+): FormulaComparison {
+  const buckets: Record<ExitFormulaKey, SimOutcome[]> = {
+    classic: [],
+    structure: [],
+    trail: [],
+    hybrid: [],
+  };
+  let totalSignals = 0;
+
+  for (const s of series) {
+    const { candles } = s;
+    if (candles.length < MIN_HISTORY + 2) continue;
+    const start = Math.max(MIN_HISTORY, candles.length - daysBack);
+
+    for (let i = start; i < candles.length; i++) {
+      if (!matchesAt(strategy, candles, i)) continue;
+
+      const tech = computeTechnicals(candles.slice(0, i + 1));
+      const entry = candles[i].close;
+      const atr = tech.atr14;
+      if (atr === null || atr <= 0) continue;
+
+      const classic = computeTargets(strategy, entry, tech, null, "classic");
+      const structure = computeTargets(strategy, entry, tech, null, "structure");
+      const cT = classic.targets[0]?.price ?? null;
+      const cS = classic.stopLoss;
+      const sT = structure.targets[0]?.price ?? null;
+      const sS = structure.stopLoss;
+      if (cT === null || cS === null || sT === null || sS === null) continue;
+      if (!(cT > entry && cS < entry && cS > 0)) continue;
+      if (!(sT > entry && sS < entry && sS > 0)) continue;
+
+      totalSignals++;
+      const horizonEnd = Math.min(i + TRADE_HORIZON, candles.length - 1);
+
+      const rClassic = simulateFixedExit(candles, i, entry, cT, cS);
+      if (rClassic) buckets.classic.push(rClassic);
+
+      const rStructure = simulateFixedExit(candles, i, entry, sT, sS);
+      if (rStructure) buckets.structure.push(rStructure);
+
+      const rTrail = simulateTrailExit(candles, i, entry, sS, atr, horizonEnd, null);
+      if (rTrail) buckets.trail.push(rTrail);
+
+      const rHybrid = simulateHybridExit(candles, i, entry, sT, sS, atr);
+      if (rHybrid) buckets.hybrid.push(rHybrid);
+    }
+  }
+
+  const longest = series.reduce((m, s) => Math.max(m, s.candles.length), 0);
+  return {
+    strategy,
+    totalSignals,
+    daysTested: Math.min(daysBack, Math.max(0, longest - MIN_HISTORY)),
+    variants: (Object.keys(buckets) as ExitFormulaKey[]).map((k) =>
+      summarizeVariant(k, buckets[k])
+    ),
+  };
+}
+
 /** يشغّل الاختبار على آخر `daysBack` جلسة */
 export function runBacktest(
   strategy: BacktestStrategy,

@@ -6,7 +6,9 @@ import { cached } from "@/lib/cache";
 import {
   BacktestResult,
   BacktestStrategy,
+  FormulaComparison,
   runBacktest,
+  runFormulaComparison,
   summarizeBacktest,
   TRADE_HORIZON,
 } from "@/lib/backtest/engine";
@@ -35,14 +37,18 @@ export interface BacktestResponse extends BacktestResult {
   notesAr: string[];
 }
 
-async function buildBacktest(
-  strategy: BacktestStrategy,
-  daysBack: number
-): Promise<BacktestResponse> {
-  const notesAr: string[] = [];
+export interface BacktestCompareResponse extends FormulaComparison {
+  asOf: string;
+  universeSize: number;
+  notesAr: string[];
+}
 
-  // 1) الكون: أعلى الأسهم سيولة بنطاق سعري موسع (0.5-15) ليشمل أسهماً
-  //    كانت داخل نطاق 1-10 في الجلسات الماضية وانزاحت قليلاً منذ ذلك الحين.
+type Series = { ticker: string; name: string; candles: Awaited<ReturnType<typeof fetchCandles>> }[];
+
+/** الكون + شموع 6 أشهر — مشترك بين الاختبار العادي ومقارنة الصيغ */
+async function loadSeries(): Promise<Series> {
+  // الكون: أعلى الأسهم سيولة بنطاق سعري موسع (0.5-15) ليشمل أسهماً
+  // كانت داخل نطاق 1-10 في الجلسات الماضية وانزاحت قليلاً منذ ذلك الحين.
   const universe = await runYahooScreener({
     priceMin: 0.5,
     priceMax: 15,
@@ -51,8 +57,8 @@ async function buildBacktest(
     cap: UNIVERSE_CAP,
   });
 
-  // 2) شموع 6 أشهر لكل سهم (بتوازٍ محدود؛ الكاش يجعل الطلبات التالية فورية)
-  const series: { ticker: string; name: string; candles: Awaited<ReturnType<typeof fetchCandles>> }[] = [];
+  // شموع 6 أشهر لكل سهم (بتوازٍ محدود؛ الكاش يجعل الطلبات التالية فورية)
+  const series: Series = [];
   const CONC = 8;
   for (let i = 0; i < universe.length; i += CONC) {
     const batch = universe.slice(i, i + CONC);
@@ -67,8 +73,37 @@ async function buildBacktest(
       if (f.candles.length >= 30) series.push(f);
     }
   }
+  return series;
+}
 
-  // 3) الاختبار الأولي (بلا شرط الأسهم الحرة)
+/** مقارنة صيغ الهدف/الوقف الأربع على نفس إشارات الفترة */
+async function buildComparison(
+  strategy: BacktestStrategy,
+  daysBack: number
+): Promise<BacktestCompareResponse> {
+  const series = await loadSeries();
+  const cmp = runFormulaComparison(strategy, series, daysBack);
+  return {
+    ...cmp,
+    asOf: new Date().toISOString(),
+    universeSize: series.length,
+    notesAr: [
+      "كل الصيغ تُحاكى على الإشارات نفسها: دخول بإغلاق جلسة الإشارة، الوقف يُغلَّب تحفظاً عند التلامس المزدوج، وفجوات الافتتاح تُحتسب بسعر الافتتاح.",
+      `الخروج الزمني بعد ${TRADE_HORIZON} جلسة لكل الصيغ، والإشارات غير المحسومة بعدُ مستثناة.`,
+      "المقارنة قبل شرط الأسهم الحرة (يستوي أثره على كل الصيغ فلا يغيّر الترتيب).",
+      "المنصة تعتمد الصيغة الهيكلية افتراضياً في كل الأهداف والأوقاف المعروضة.",
+    ],
+  };
+}
+
+async function buildBacktest(
+  strategy: BacktestStrategy,
+  daysBack: number
+): Promise<BacktestResponse> {
+  const notesAr: string[] = [];
+  const series = await loadSeries();
+
+  // الاختبار الأولي (بلا شرط الأسهم الحرة)
   const prelim = runBacktest(strategy, series, daysBack);
 
   // 4) شرط الأسهم الحرة: يُطبَّق بالقيمة الحالية على رموز الإشارات فقط
@@ -158,6 +193,14 @@ export async function GET(request: NextRequest) {
   );
 
   try {
+    if (sp.get("compare") === "1") {
+      const res = await cached<BacktestCompareResponse>(
+        `backtest:compare:${preset}:${days}`,
+        60 * 60_000,
+        () => buildComparison(preset, days)
+      );
+      return NextResponse.json(res);
+    }
     const res = await cached<BacktestResponse>(
       `backtest:${preset}:${days}`,
       60 * 60_000, // ساعة — نتائج الجلسات الماضية لا تتغير خلال اليوم
