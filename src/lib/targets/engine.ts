@@ -1,9 +1,11 @@
 // ============================================================
 // محرك الأهداف والتوقعات — دوال نقية حتمية (بلا أي جلب بيانات).
 //
-// صيغتان للمضاربة (liquidity/momentum):
+// صيغتان للمضاربة (liquidity/momentum) — الافتراضي لكل استراتيجية
+// قرار تجريبي من مقارنة الاختبار التاريخي (defaultFormulaFor):
+// الزخم → الكلاسيكية، والسيولة → الهيكلية.
 //
-// «الهيكلية» structure — الافتراضية (معيار التداول الاحترافي المستقر):
+// «الهيكلية» structure (معيار التداول الاحترافي المستقر):
 //  - الوقف: تحت آخر قاع متأرجح فعلي في الشارت (بهامش ربع ATR)، بشرط
 //    مسافة معقولة (0.75×ATR حتى 2.5×ATR من الدخول) — السوق يحترم
 //    القيعان الفعلية أكثر من المعادلات المجردة. عند غيابها: مرشحات
@@ -483,12 +485,22 @@ function buildExpectationAr(
   return `${trendPhrase}${rsiPhrase}.${scenario}`;
 }
 
+/**
+ * الصيغة الافتراضية لكل استراتيجية — قرار تجريبي من مقارنة الاختبار
+ * التاريخي (30 جلسة): الكلاسيكية تتفوق على الزخم (أهداف قريبة تُصاب
+ * قبل انعكاس القفزة)، والهيكلية على السيولة. أعد التدقيق دورياً من
+ * زر «قارن صيغ الهدف/الوقف».
+ */
+export function defaultFormulaFor(strategy: StrategyKey): TargetFormula {
+  return strategy === "momentum" ? "classic" : "structure";
+}
+
 export function computeTargets(
   strategy: StrategyKey,
   entry: number,
   tech: TechnicalSnapshot,
   analystTarget?: number | null,
-  formula: TargetFormula = "structure"
+  formula?: TargetFormula
 ): TargetsResult {
   const strategyAr = STRATEGY_NAMES_AR[strategy];
 
@@ -511,10 +523,11 @@ export function computeTargets(
   }
 
   const at = analystTarget ?? null;
+  const chosen = formula ?? defaultFormulaFor(strategy);
   let built: { targets: RawTarget[]; stop: RawStop };
   if (strategy === "longterm") {
     built = buildLongterm(entry, tech, at);
-  } else if (formula === "structure") {
+  } else if (chosen === "structure") {
     // الهيكلية أولاً — وعند غياب ATR تسقط للكلاسيكية تلقائياً
     built =
       buildStructured(strategy, entry, tech) ??

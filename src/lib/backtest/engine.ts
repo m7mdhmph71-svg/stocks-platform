@@ -310,7 +310,13 @@ export function summarizeBacktest(
 //             لا ينزل تحت سعر الدخول — خطة المنصة المنصوح بها نصاً
 // ============================================================
 
-export type ExitFormulaKey = "classic" | "structure" | "trail" | "hybrid";
+export type ExitFormulaKey =
+  | "classic"
+  | "structure"
+  | "trail"
+  | "hybrid"
+  | "overnight"
+  | "nextclose";
 
 export interface VariantSummary {
   key: ExitFormulaKey;
@@ -345,6 +351,16 @@ export const VARIANT_META: Record<
     labelAr: "الهجينة",
     descriptionAr:
       "نصف الكمية عند الهدف الأول والباقي بوقف متحرك لا ينزل تحت الدخول",
+  },
+  overnight: {
+    labelAr: "ليلة واحدة",
+    descriptionAr:
+      "شراء بإغلاق الإشارة وبيع بافتتاح الجلسة التالية — اختبار توقيت خالص بلا هدف ولا وقف",
+  },
+  nextclose: {
+    labelAr: "جلسة واحدة",
+    descriptionAr:
+      "شراء بإغلاق الإشارة وبيع بإغلاق الجلسة التالية — اختبار توقيت خالص بلا هدف ولا وقف",
   },
 };
 
@@ -488,6 +504,8 @@ export function runFormulaComparison(
     structure: [],
     trail: [],
     hybrid: [],
+    overnight: [],
+    nextclose: [],
   };
   let totalSignals = 0;
 
@@ -528,6 +546,17 @@ export function runFormulaComparison(
 
       const rHybrid = simulateHybridExit(candles, i, entry, sT, sS, atr);
       if (rHybrid) buckets.hybrid.push(rHybrid);
+
+      // اختبارا التوقيت الخالص: أين نافذة الربح حول الإشارة؟
+      if (i + 1 < candles.length) {
+        const next = candles[i + 1];
+        if (next.open > 0) {
+          buckets.overnight.push({ ret: pct(next.open, entry), sessions: 1 });
+        }
+        if (next.close > 0) {
+          buckets.nextclose.push({ ret: pct(next.close, entry), sessions: 1 });
+        }
+      }
     }
   }
 

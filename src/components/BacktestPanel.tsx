@@ -249,7 +249,8 @@ export function BacktestPanel() {
                               الأفضل
                             </span>
                           ) : null}
-                          {v.key === "structure" ? (
+                          {v.key ===
+                          (strategy === "momentum" ? "classic" : "structure") ? (
                             <span className="ms-2 rounded-full bg-zinc-200 px-2 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
                               المعتمدة حالياً
                             </span>
