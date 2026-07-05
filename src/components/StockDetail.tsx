@@ -43,9 +43,16 @@ function tickModeFor(range: ChartRange, intraday: boolean): TickMode {
   return "date";
 }
 
-export function StockDetail({ ticker }: { ticker: string }) {
-  const [data, setData] = useState<StockDetailResponse | null>(null);
-  const [loading, setLoading] = useState(true);
+export function StockDetail({
+  ticker,
+  initial,
+}: {
+  ticker: string;
+  /** بيانات مُصيَّرة خادمياً — وجودها يلغي الجلب الأول من المتصفح */
+  initial?: StockDetailResponse;
+}) {
+  const [data, setData] = useState<StockDetailResponse | null>(initial ?? null);
+  const [loading, setLoading] = useState(!initial);
   const [error, setError] = useState<string | null>(null);
   const [refresh, setRefresh] = useState(0);
   const [strategy, setStrategy] = useState<StrategyKey>("liquidity");
@@ -58,6 +65,8 @@ export function StockDetail({ ticker }: { ticker: string }) {
   const [chartError, setChartError] = useState<string | null>(null);
 
   useEffect(() => {
+    // البيانات الخادمية تغني عن الجلب الأول — يُعاد الجلب فقط عند «إعادة المحاولة»
+    if (initial && refresh === 0) return;
     let cancelled = false;
     setLoading(true);
     setError(null);
@@ -83,7 +92,7 @@ export function StockDetail({ ticker }: { ticker: string }) {
     return () => {
       cancelled = true;
     };
-  }, [ticker, refresh]);
+  }, [ticker, refresh, initial]);
 
   const retry = useCallback(() => setRefresh((n) => n + 1), []);
 

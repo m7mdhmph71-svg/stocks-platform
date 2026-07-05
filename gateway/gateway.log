@@ -294,3 +294,32 @@ Closing session: SessionEntry {
     remoteIdentityKey: <Buffer 05 55 56 89 3f ab be 02 ef 49 2b 15 37 e0 5c 7f 9b fd 7b 78 c3 aa 68 09 16 eb 03 6b c8 52 85 e0 62>
   }
 }
+Closing session: SessionEntry {
+  _chains: {
+    'BfHP7Vcu0DsZZHFpoW5+heXF9mTTlqeNa4lwNFTcvIxl': { chainKey: [Object], chainType: 1, messageKeys: {} }
+  },
+  registrationId: 980418280,
+  currentRatchet: {
+    ephemeralKeyPair: {
+      pubKey: <Buffer 05 f1 cf ed 57 2e d0 3b 19 64 71 69 a1 6e 7e 85 e5 c5 f6 64 d3 96 a7 8d 6b 89 70 34 54 dc bc 8c 65>,
+      privKey: <Buffer d8 77 c5 81 27 09 26 5b 9f 98 ca c3 d0 17 32 01 0e e3 23 01 93 88 5a 87 a1 7f 31 93 29 5c c0 66>
+    },
+    lastRemoteEphemeralKey: <Buffer 05 d6 b3 b8 02 bc c1 39 36 2a 17 d0 bd fc 2c 99 9c f8 48 b2 ad 47 22 c5 40 77 e5 2e 84 dd ac 27 02>,
+    previousCounter: 0,
+    rootKey: <Buffer cc 0d 94 f6 93 14 0b f5 fc 02 bd 70 86 08 96 82 7d 0a 65 ba 18 4f 0f 56 09 69 78 d5 84 a3 c2 28>
+  },
+  indexInfo: {
+    baseKey: <Buffer 05 92 4f c9 10 ac a7 72 56 98 54 eb a2 07 74 22 34 8c 9a 49 05 95 76 14 bd b3 1a 61 65 75 78 bc 31>,
+    baseKeyType: 1,
+    closed: -1,
+    used: 1783274359499,
+    created: 1783274359499,
+    remoteIdentityKey: <Buffer 05 55 56 89 3f ab be 02 ef 49 2b 15 37 e0 5c 7f 9b fd 7b 78 c3 aa 68 09 16 eb 03 6b c8 52 85 e0 62>
+  },
+  pendingPreKey: {
+    signedKeyId: 12407264,
+    baseKey: <Buffer 05 92 4f c9 10 ac a7 72 56 98 54 eb a2 07 74 22 34 8c 9a 49 05 95 76 14 bd b3 1a 61 65 75 78 bc 31>,
+    preKeyId: 3750
+  }
+}
+[02:13:19] تجاهل رسالة من محادثة غير مسموحة: 170849655078999@lid
