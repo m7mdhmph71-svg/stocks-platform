@@ -215,8 +215,12 @@ export interface ScreenerPreset {
 
 export type DataSource = "yahoo" | "finviz" | "demo";
 
-/** مفاتيح تبويبات الفرز: الاستراتيجيات الثلاث + السوق السعودي + المخصص */
-export type ScreenerPresetKey = StrategyKey | "saudi" | "custom";
+/** مفاتيح الفرز: الاستراتيجيات الأربع (أمريكا) + نظيراتها السعودية + المخصص */
+export type ScreenerPresetKey =
+  | StrategyKey
+  | "saudi"
+  | "saudi-trend"
+  | "custom";
 
 export interface ScreenerResponse {
   preset: ScreenerPresetKey;
@@ -236,6 +240,8 @@ export interface StockDetailResponse {
   candles: Candle[];
   /** أهداف لكل استراتيجية */
   targetsByStrategy: Record<StrategyKey, TargetsResult>;
+  /** ملاءمة السهم لكل استراتيجية + الترشيح الافتراضي (محرك fit.ts) */
+  fit: import("@/lib/targets/fit").StockFit;
   /** متوسط هدف المحللين إن توفر */
   analystTargetMean: number | null;
   analystRecommendation: string | null;

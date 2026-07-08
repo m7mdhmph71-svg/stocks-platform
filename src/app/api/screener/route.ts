@@ -167,7 +167,7 @@ function demoResponse(
   noteAr: string
 ): ScreenerResponse {
   // لا بيانات تجريبية للسوق السعودي — استجابة فارغة مفسَّرة بدل أسهم أمريكية مضللة
-  if (preset === "saudi") {
+  if (preset === "saudi" || preset === "saudi-trend") {
     return {
       preset,
       source: "demo",
@@ -208,6 +208,7 @@ async function screenLive(
     preset !== "custom" &&
     preset !== "saudi" &&
     preset !== "trend" &&
+    preset !== "saudi-trend" &&
     finvizAvailable()
   ) {
     const fv = await fetchFinvizRows(PRESETS[preset].finvizQuery);
@@ -230,10 +231,24 @@ async function screenLive(
   if (preset === "saudi") coarse.region = "sa";
 
   // «الاتجاه الصاعد»: كون جودة وسيولة ثم بوابة فنية على شموع سنة
-  if (preset === "trend") {
+  // (يخدم السوقين: trend للأمريكي وsaudi-trend لتداول)
+  if (preset === "trend" || preset === "saudi-trend") {
+    if (preset === "saudi-trend") {
+      coarse.region = "sa";
+      // كون الجودة السعودي: أحجام تداول أدنى من الأمريكي
+      coarse.priceMin = 5;
+      coarse.avgVolumeMin = 100_000;
+      coarse.marketCapMin = 1_000_000_000; // مليار ريال
+    }
     coarse.cap = 400;
     let candidates = await runYahooScreener(coarse);
     candidates = candidates.slice(0, 400);
+    if (preset === "saudi-trend") {
+      candidates = candidates.map((r) => ({
+        ...r,
+        name: saudiNameAr(r.ticker) ?? r.name,
+      }));
+    }
     const final: StockRow[] = [];
     const CONC = 6;
     for (let i = 0; i < candidates.length && final.length < 60; i += CONC) {
@@ -457,6 +472,9 @@ export async function GET(request: NextRequest) {
   } else if (presetParam === "trend") {
     preset = "trend";
     conds = TREND_PRESET.conditions;
+  } else if (presetParam === "saudi-trend") {
+    preset = "saudi-trend";
+    conds = []; // الكون السعودي يُحدد داخل فرع الاتجاه مباشرة
   } else if ((PRESET_KEYS as string[]).includes(presetParam)) {
     preset = presetParam as StrategyKey;
     conds = PRESETS[preset as Exclude<StrategyKey, "trend">].conditions;

@@ -15,6 +15,7 @@ import { fetchFundamentals } from "@/lib/yahoo/quote";
 import { yahooJson } from "@/lib/yahoo/client";
 import { computeTechnicals } from "@/lib/targets/technicals";
 import { computeTargets } from "@/lib/targets/engine";
+import { classifyStockFit } from "@/lib/targets/fit";
 import { screenShariah } from "@/lib/shariah/screen";
 import { saudiNameAr } from "@/lib/saudi/companies";
 import {
@@ -101,6 +102,16 @@ async function buildStockDetail(raw: string): Promise<StockDetailResult> {
           computeTargets(s, row.price, tech, fund?.targetMeanPrice ?? null),
         ])
       ) as Record<StrategyKey, TargetsResult>;
+      const fit = classifyStockFit({
+        price: row.price,
+        marketCap: row.marketCap,
+        floatShares: row.floatShares,
+        volume: row.volume,
+        avgVolume3m: row.avgVolume3m,
+        relativeVolume: row.relativeVolume,
+        isSaudi: false,
+        tech,
+      });
       return {
         ok: true,
         data: {
@@ -109,6 +120,7 @@ async function buildStockDetail(raw: string): Promise<StockDetailResult> {
           row: { ...row, shariah, weekPerfPercent: tech.weekPerfPercent },
           candles,
           targetsByStrategy,
+          fit,
           analystTargetMean: fund?.targetMeanPrice ?? null,
           analystRecommendation: fund?.recommendationKey ?? null,
           notesAr: ["هذه بيانات تجريبية للعرض فقط — ليست أسعاراً حقيقية."],
@@ -209,6 +221,17 @@ async function buildStockDetail(raw: string): Promise<StockDetailResult> {
       ])
     ) as Record<StrategyKey, TargetsResult>;
 
+    const fit = classifyStockFit({
+      price,
+      marketCap: row.marketCap,
+      floatShares: row.floatShares,
+      volume: row.volume,
+      avgVolume3m: row.avgVolume3m,
+      relativeVolume: row.relativeVolume,
+      isSaudi: ticker.endsWith(".SR"),
+      tech,
+    });
+
     if (!fund) {
       notesAr.push(
         "تعذّر جلب القوائم المالية — الفحص الشرعي غير محسوم (بيانات غير كافية)."
@@ -223,6 +246,7 @@ async function buildStockDetail(raw: string): Promise<StockDetailResult> {
         row,
         candles,
         targetsByStrategy,
+        fit,
         analystTargetMean: fund?.targetMeanPrice ?? null,
         analystRecommendation: fund?.recommendationKey ?? null,
         notesAr,

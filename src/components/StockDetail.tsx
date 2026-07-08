@@ -12,6 +12,8 @@ import {
   fmtPrice,
 } from "@/lib/format";
 import { fetchJson, fmtDateTimeAr } from "@/components/ui";
+import { MarketStatusBadge } from "@/components/MarketStatusBadge";
+import { marketOf } from "@/lib/marketHours";
 import { SourceBanner } from "@/components/SourceBanner";
 import { WatchTradeActions } from "@/components/WatchTradeActions";
 import { ShariahBadge } from "@/components/ShariahBadge";
@@ -55,7 +57,10 @@ export function StockDetail({
   const [loading, setLoading] = useState(!initial);
   const [error, setError] = useState<string | null>(null);
   const [refresh, setRefresh] = useState(0);
-  const [strategy, setStrategy] = useState<StrategyKey>("liquidity");
+  // الافتراضي: الاستراتيجية الملائمة للسهم (من محرك fit) — لا «صيد السيولة» للجميع
+  const [strategy, setStrategy] = useState<StrategyKey>(
+    initial?.fit.closest ?? "trend"
+  );
 
   // الرسم البياني: «سنة» تأتي مع استجابة السهم، وبقية الفترات تُجلب عند الطلب
   const [range, setRange] = useState<ChartRange>("1y");
@@ -78,7 +83,10 @@ export function StockDetail({
       `/api/stock/${encodeURIComponent(ticker)}`
     )
       .then((res) => {
-        if (!cancelled) setData(res);
+        if (!cancelled) {
+          setData(res);
+          setStrategy(res.fit.closest);
+        }
       })
       .catch((e: unknown) => {
         if (!cancelled) {
@@ -167,7 +175,8 @@ export function StockDetail({
               <ShariahBadge shariah={row.shariah} size="lg" />
             </div>
             <p className="mt-1 text-zinc-600 dark:text-zinc-300">{row.name}</p>
-            <div className="mt-2 flex flex-wrap gap-1.5">
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <MarketStatusBadge market={marketOf(row.ticker)} />
               {row.exchange ? <span className="chip">{row.exchange}</span> : null}
               {row.sector ? <span className="chip">{row.sector}</span> : null}
               {row.industry ? (
@@ -216,6 +225,7 @@ export function StockDetail({
         <div className="min-w-0 space-y-6">
           <TargetsCard
             currency={currency}
+            fit={data.fit}
             byStrategy={targetsByStrategy}
             selected={strategy}
             onSelect={setStrategy}

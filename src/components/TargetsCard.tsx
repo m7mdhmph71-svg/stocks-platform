@@ -1,6 +1,7 @@
 "use client";
 
 import { StrategyKey, TargetsResult, Trend } from "@/lib/types";
+import type { StockFit } from "@/lib/targets/fit";
 import { fmtNum, fmtPercent, fmtPrice } from "@/lib/format";
 
 const STRATEGY_ORDER: StrategyKey[] = ["liquidity", "momentum", "trend", "longterm"];
@@ -96,6 +97,7 @@ function ScoreMeter({ score }: { score: number | null }) {
 
 export function TargetsCard({
   byStrategy,
+  fit,
   currency = "$",
   selected,
   onSelect,
@@ -103,6 +105,8 @@ export function TargetsCard({
   analystRecommendation,
 }: {
   byStrategy: Record<StrategyKey, TargetsResult>;
+  /** ملاءمة السهم لكل استراتيجية (محرك fit) */
+  fit: StockFit;
   /** عملة العرض (افتراضياً دولار) */
   currency?: string;
   selected: StrategyKey;
@@ -111,12 +115,24 @@ export function TargetsCard({
   analystRecommendation: string | null;
 }) {
   const t = byStrategy[selected];
+  const selectedFit = fit.perStrategy[selected];
 
   return (
     <section className="card p-5 sm:p-6">
-      <h2 className="mb-4 text-lg font-bold text-zinc-900 dark:text-zinc-50">
-        الأهداف والتوقعات
-      </h2>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+          الأهداف والتوقعات
+        </h2>
+        {fit.recommended !== null ? (
+          <span className="chip border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-700/70 dark:bg-emerald-950/60 dark:text-emerald-300">
+            الخطة الملائمة: {byStrategy[fit.recommended].strategyAr}
+          </span>
+        ) : (
+          <span className="chip border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-700/70 dark:bg-amber-950/50 dark:text-amber-300">
+            لا خطة ملائمة الآن
+          </span>
+        )}
+      </div>
 
       {/* تبويبات الاستراتيجيات */}
       <div
@@ -124,23 +140,62 @@ export function TargetsCard({
         aria-label="استراتيجية الأهداف"
         className="mb-5 flex flex-wrap gap-2"
       >
-        {STRATEGY_ORDER.map((k) => (
-          <button
-            key={k}
-            role="tab"
-            aria-selected={selected === k}
-            type="button"
-            onClick={() => onSelect(k)}
+        {STRATEGY_ORDER.map((k) => {
+          const lv = fit.perStrategy[k].level;
+          const mark = lv === "good" ? "✓" : lv === "partial" ? "≈" : "";
+          const dim = lv === "poor" && selected !== k;
+          return (
+            <button
+              key={k}
+              role="tab"
+              aria-selected={selected === k}
+              type="button"
+              title={fit.perStrategy[k].reasonAr}
+              onClick={() => onSelect(k)}
+              className={
+                "rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors " +
+                (selected === k
+                  ? "bg-brand-600 text-white shadow-sm"
+                  : dim
+                    ? "border border-zinc-200 bg-white text-zinc-400 hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-500"
+                    : "border border-zinc-300 bg-white text-zinc-600 hover:border-brand-400 hover:text-brand-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:text-brand-400")
+              }
+            >
+              {byStrategy[k].strategyAr}
+              {mark ? (
+                <span
+                  className={
+                    "ms-1 " +
+                    (selected === k
+                      ? "text-white/90"
+                      : lv === "good"
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-amber-600 dark:text-amber-400")
+                  }
+                >
+                  {mark}
+                </span>
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* تنبيه الملاءمة للخطة المعروضة */}
+      <div className="mb-5 -mt-1">
+        {selectedFit.level === "good" ? null : (
+          <p
             className={
-              "rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors " +
-              (selected === k
-                ? "bg-brand-600 text-white shadow-sm"
-                : "border border-zinc-300 bg-white text-zinc-600 hover:border-brand-400 hover:text-brand-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:text-brand-400")
+              "rounded-xl px-3.5 py-2.5 text-xs leading-6 " +
+              (selectedFit.level === "partial"
+                ? "bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+                : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800/70 dark:text-zinc-300")
             }
           >
-            {byStrategy[k].strategyAr}
-          </button>
-        ))}
+            {selectedFit.level === "partial" ? "ملاءمة جزئية: " : "خطة غير ملائمة لهذا السهم — معروضة للاطلاع فقط: "}
+            {selectedFit.reasonAr}.
+          </p>
+        )}
       </div>
 
       {/* الاتجاه + العائد/المخاطرة */}
@@ -217,10 +272,12 @@ export function TargetsCard({
         </p>
       )}
 
-      {/* الدرجة */}
-      <div className="mb-5">
-        <ScoreMeter score={t.score} />
-      </div>
+      {/* الدرجة — تُعرض فقط عندما تكون الخطة ملائمة فعلاً لهذا السهم */}
+      {selectedFit.level === "good" ? (
+        <div className="mb-5">
+          <ScoreMeter score={t.score} />
+        </div>
+      ) : null}
 
       {/* التوقع */}
       <p className="rounded-xl border border-zinc-200 bg-zinc-50/70 p-3.5 text-sm leading-7 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-800/40 dark:text-zinc-200">

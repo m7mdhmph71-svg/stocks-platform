@@ -9,7 +9,8 @@ import {
   ScreenerResponse,
   StrategyKey,
 } from "@/lib/types";
-import { PRESETS } from "@/lib/filters/presets";
+import { PRESETS, STRATEGY_NAMES_AR } from "@/lib/filters/presets";
+import { MarketStatusBadge } from "@/components/MarketStatusBadge";
 import { SAUDI_PRESET } from "@/lib/filters/saudi";
 import { TREND_PRESET } from "@/lib/filters/trend";
 import { saveSnapshot } from "@/lib/history";
@@ -24,13 +25,24 @@ import { SourceBanner } from "@/components/SourceBanner";
 import { TableSkeleton } from "@/components/Skeletons";
 import { EmptyState, ErrorBox } from "@/components/States";
 
-type Tab = StrategyKey | "saudi" | "custom" | "history";
+/** العرض الحالي: استراتيجية أو أداة (مخصص/سجل) — السوق بُعد مستقل */
+type Tab = StrategyKey | "custom" | "history";
+type Market = "us" | "sa";
 
-const STRATEGY_KEYS: Array<Exclude<StrategyKey, "trend">> = [
-  "liquidity",
-  "momentum",
-  "longterm",
-];
+const STRATEGIES: StrategyKey[] = ["liquidity", "momentum", "trend", "longterm"];
+
+const MARKET_LABELS: Record<Market, string> = {
+  us: "السوق الأمريكي",
+  sa: "السوق السعودي",
+};
+
+/** مفتاح الـ API للسوق والاستراتيجية — null = غير متاحة لهذا السوق بعد */
+function presetKeyFor(market: Market, strategy: StrategyKey): string | null {
+  if (market === "us") return strategy;
+  if (strategy === "momentum") return "saudi";
+  if (strategy === "trend") return "saudi-trend";
+  return null; // السيولة والاستثمار: بيانات تداول لا تكفيهما بعد
+}
 
 const VALID_FIELDS: FilterField[] = [
   "price",
@@ -96,16 +108,19 @@ export function ScreenerClient() {
   const presetParam = searchParams.get("preset");
   const conditionsParam = searchParams.get("conditions");
 
+  // (سوق، عرض) من معامل رابط واحد — الروابط القديمة تعمل كما هي
+  const market: Market =
+    presetParam === "saudi" || presetParam === "saudi-trend" ? "sa" : "us";
   const tab: Tab =
     presetParam === "custom"
       ? "custom"
       : presetParam === "history"
         ? "history"
         : presetParam === "saudi"
-          ? "saudi"
-          : presetParam === "trend"
+          ? "momentum"
+          : presetParam === "saudi-trend"
             ? "trend"
-            : STRATEGY_KEYS.includes(presetParam as Exclude<StrategyKey, "trend">)
+            : STRATEGIES.includes(presetParam as StrategyKey)
               ? (presetParam as StrategyKey)
               : "liquidity";
 
@@ -128,8 +143,9 @@ export function ScreenerClient() {
         encodeURIComponent(JSON.stringify(customConditions))
       );
     }
-    return `/api/screener?preset=${tab}`;
-  }, [tab, customConditions]);
+    const key = presetKeyFor(market, tab);
+    return key ? `/api/screener?preset=${key}` : null;
+  }, [tab, market, customConditions]);
 
   useEffect(() => {
     if (!url) {
@@ -149,14 +165,10 @@ export function ScreenerClient() {
           const nameAr =
             tab === "custom"
               ? "فلتر مخصص"
-              : tab === "saudi"
-                ? SAUDI_PRESET.nameAr
-                : tab === "trend"
-                  ? TREND_PRESET.nameAr
-                  : tab !== "history"
-                    ? PRESETS[tab].nameAr
-                    : "";
-          if (nameAr) saveSnapshot(tab, nameAr, res);
+              : tab !== "history"
+                ? `${STRATEGY_NAMES_AR[tab]}${market === "sa" ? " — تداول" : ""}`
+                : "";
+          if (nameAr) saveSnapshot(res.preset, nameAr, res);
         }
       })
       .catch((e: unknown) => {
@@ -173,16 +185,34 @@ export function ScreenerClient() {
     };
   }, [url, refresh, tab]);
 
-  const switchTab = useCallback(
-    (next: Tab) => {
+  const go = useCallback(
+    (presetKey: string, withConditions = false) => {
       const params = new URLSearchParams();
-      params.set("preset", next);
-      if (next === "custom" && conditionsParam) {
+      params.set("preset", presetKey);
+      if (withConditions && conditionsParam) {
         params.set("conditions", conditionsParam);
       }
       router.replace(`/screener?${params.toString()}`);
     },
     [router, conditionsParam]
+  );
+
+  const switchStrategy = useCallback(
+    (k: StrategyKey) => {
+      const key = presetKeyFor(market, k);
+      if (key) go(key);
+    },
+    [market, go]
+  );
+
+  const switchMarket = useCallback(
+    (m: Market) => {
+      const current: StrategyKey =
+        tab === "custom" || tab === "history" ? "momentum" : tab;
+      const key = presetKeyFor(m, current) ?? presetKeyFor(m, "momentum");
+      if (key) go(key);
+    },
+    [tab, go]
   );
 
   const applyConditions = useCallback(
@@ -197,13 +227,28 @@ export function ScreenerClient() {
     [router]
   );
 
+  /** لوحة دلالات Finviz — لفلاتر السوق الأمريكي الثلاثة الأصلية فقط */
   const preset =
-    tab !== "custom" && tab !== "history" && tab !== "saudi" && tab !== "trend"
+    market === "us" && tab !== "custom" && tab !== "history" && tab !== "trend"
       ? PRESETS[tab]
       : null;
-  /** بطاقة الوصف: الثلاثة من PRESETS، والسعودي والاتجاه من إعدادَيهما */
+  /** بطاقة الوصف بحسب (السوق، الاستراتيجية) */
   const info =
-    tab === "saudi" ? SAUDI_PRESET : tab === "trend" ? TREND_PRESET : preset;
+    tab === "custom" || tab === "history"
+      ? null
+      : market === "sa"
+        ? tab === "momentum"
+          ? SAUDI_PRESET
+          : {
+              ...TREND_PRESET,
+              advancedNotesAr: [
+                "نسخة تداول: كون جودة سعودي (سعر ≥ 5 ر.س، قيمة سوقية ≥ مليار ريال، متوسط حجم ≥ 100 ألف).",
+                ...TREND_PRESET.advancedNotesAr,
+              ],
+            }
+        : tab === "trend"
+          ? TREND_PRESET
+          : PRESETS[tab];
 
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-8 sm:px-6">
@@ -217,84 +262,94 @@ export function ScreenerClient() {
         </p>
       </div>
 
-      {/* التبويبات */}
+      {/* ١) اختيار السوق + حالته الحية */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div
+          role="tablist"
+          aria-label="السوق"
+          className="flex gap-1 rounded-full border border-zinc-300 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-900"
+        >
+          {(["us", "sa"] as Market[]).map((m) => (
+            <button
+              key={m}
+              role="tab"
+              aria-selected={market === m && tab !== "custom" && tab !== "history"}
+              type="button"
+              onClick={() => switchMarket(m)}
+              className={
+                "rounded-full px-4 py-1.5 text-sm font-bold transition-colors " +
+                (market === m
+                  ? "bg-brand-600 text-white shadow-sm"
+                  : "text-zinc-600 hover:text-brand-700 dark:text-zinc-300 dark:hover:text-brand-400")
+              }
+            >
+              {MARKET_LABELS[m]}
+            </button>
+          ))}
+        </div>
+        <MarketStatusBadge market={market} />
+      </div>
+
+      {/* ٢) الاستراتيجية */}
       <div
         role="tablist"
-        aria-label="استراتيجيات الفرز"
+        aria-label="الاستراتيجية"
         className="flex flex-wrap gap-2"
       >
-        {STRATEGY_KEYS.map((k) => (
-          <button
-            key={k}
-            role="tab"
-            aria-selected={tab === k}
-            type="button"
-            onClick={() => switchTab(k)}
-            className={
-              "rounded-full px-4 py-2 text-sm font-medium transition-colors " +
-              (tab === k
-                ? "bg-brand-600 text-white shadow-sm"
-                : "border border-zinc-300 bg-white text-zinc-600 hover:border-brand-400 hover:text-brand-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:text-brand-400")
-            }
-          >
-            {PRESETS[k].nameAr}
-          </button>
-        ))}
+        {STRATEGIES.map((k) => {
+          const available = presetKeyFor(market, k) !== null;
+          const active = tab === k;
+          return (
+            <button
+              key={k}
+              role="tab"
+              aria-selected={active}
+              type="button"
+              disabled={!available}
+              title={available ? undefined : "قريباً للسوق السعودي — بيانات المصدر لا تكفيها بعد"}
+              onClick={() => switchStrategy(k)}
+              className={
+                "rounded-full px-4 py-2 text-sm font-medium transition-colors " +
+                (active
+                  ? "bg-brand-600 text-white shadow-sm"
+                  : available
+                    ? "border border-zinc-300 bg-white text-zinc-600 hover:border-brand-400 hover:text-brand-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:text-brand-400"
+                    : "cursor-not-allowed border border-dashed border-zinc-200 bg-transparent text-zinc-300 dark:border-zinc-800 dark:text-zinc-600")
+              }
+            >
+              {STRATEGY_NAMES_AR[k]}
+              {!available ? <span className="ms-1 text-[10px]">قريباً</span> : null}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ٣) الأدوات */}
+      <div className="flex flex-wrap items-center gap-4 text-sm">
         <button
-          role="tab"
-          aria-selected={tab === "trend"}
           type="button"
-          onClick={() => switchTab("trend")}
+          onClick={() => go("custom", true)}
           className={
-            "rounded-full px-4 py-2 text-sm font-medium transition-colors " +
-            (tab === "trend"
-              ? "bg-brand-600 text-white shadow-sm"
-              : "border border-zinc-300 bg-white text-zinc-600 hover:border-brand-400 hover:text-brand-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:text-brand-400")
-          }
-        >
-          {TREND_PRESET.nameAr}
-        </button>
-        <button
-          role="tab"
-          aria-selected={tab === "saudi"}
-          type="button"
-          onClick={() => switchTab("saudi")}
-          className={
-            "rounded-full px-4 py-2 text-sm font-medium transition-colors " +
-            (tab === "saudi"
-              ? "bg-brand-600 text-white shadow-sm"
-              : "border border-zinc-300 bg-white text-zinc-600 hover:border-brand-400 hover:text-brand-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:text-brand-400")
-          }
-        >
-          {SAUDI_PRESET.nameAr}
-        </button>
-        <button
-          role="tab"
-          aria-selected={tab === "custom"}
-          type="button"
-          onClick={() => switchTab("custom")}
-          className={
-            "rounded-full px-4 py-2 text-sm font-medium transition-colors " +
+            "underline-offset-4 transition-colors " +
             (tab === "custom"
-              ? "bg-brand-600 text-white shadow-sm"
-              : "border border-zinc-300 bg-white text-zinc-600 hover:border-brand-400 hover:text-brand-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:text-brand-400")
+              ? "font-bold text-brand-700 underline dark:text-brand-400"
+              : "text-zinc-500 hover:text-brand-700 hover:underline dark:text-zinc-400 dark:hover:text-brand-400")
           }
         >
           فلتر مخصص
         </button>
+        <span aria-hidden className="text-zinc-300 dark:text-zinc-700">·</span>
         <button
-          role="tab"
-          aria-selected={tab === "history"}
           type="button"
-          onClick={() => switchTab("history")}
+          onClick={() => go("history")}
           className={
-            "rounded-full px-4 py-2 text-sm font-medium transition-colors " +
+            "underline-offset-4 transition-colors " +
             (tab === "history"
-              ? "bg-brand-600 text-white shadow-sm"
-              : "border border-zinc-300 bg-white text-zinc-600 hover:border-brand-400 hover:text-brand-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:text-brand-400")
+              ? "font-bold text-brand-700 underline dark:text-brand-400"
+              : "text-zinc-500 hover:text-brand-700 hover:underline dark:text-zinc-400 dark:hover:text-brand-400")
           }
         >
-          السجل
+          السجل واللقطات
         </button>
       </div>
 
