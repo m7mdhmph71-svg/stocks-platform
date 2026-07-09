@@ -151,11 +151,14 @@ function buildStructured(
   const atr = isPos(t.atr14) ? t.atr14 : null;
   if (atr === null) return null;
 
-  // ١) الوقف: بنية السوق أولاً، ثم مرشحات الصيغة الكلاسيكية
-  // (الاتجاه يسقط لمرشحات الزخم الكلاسيكية عند غياب القيعان)
-  const classic =
-    strategy === "liquidity" ? buildLiquidity(entry, t) : buildMomentum(entry, t);
-  const stop = structuralStop(entry, atr, t.swingLows) ?? classic.stop;
+  // ١) الوقف يعرّف المخاطرة (1R): قاع متأرجح فعلي أولاً، وإلا وقف ATR
+  // محكوم عند 1.5×ATR — لا نسقط أبداً لوقف SMA20 الكلاسيكي الذي قد يبعد
+  // كثيراً فيقلب العائد/المخاطرة. المخاطرة تبقى ضمن [0.75, 2.5]×ATR دائماً.
+  const stop: RawStop =
+    structuralStop(entry, atr, t.swingLows) ?? {
+      price: roundPrice(entry - 1.5 * atr),
+      basisAr: "1.5× مدى الحركة اليومي ATR تحت الدخول (لا قاع متأرجح قريب صالح)",
+    };
   if (!(stop.price > 0 && stop.price < entry)) return null;
   const risk = entry - stop.price;
 
@@ -492,10 +495,12 @@ function buildExpectationAr(
  * قبل انعكاس القفزة)، والهيكلية على السيولة. أعد التدقيق دورياً من
  * زر «قارن صيغ الهدف/الوقف».
  */
-export function defaultFormulaFor(strategy: StrategyKey): TargetFormula {
-  // الزخم قصير الأفق → كلاسيكية (أهداف قريبة تُصاب قبل الانعكاس)؛
-  // السيولة والاتجاه → هيكلية (وقف بنية السوق يحتمل التذبذب الطبيعي)
-  return strategy === "momentum" ? "classic" : "structure";
+export function defaultFormulaFor(_strategy: StrategyKey): TargetFormula {
+  // كل استراتيجيات المضاربة على الصيغة الهيكلية: الوقف يعرّف المخاطرة (1R)
+  // والأهداف مضاعفات لها بحارس عائد/مخاطرة ≥ 1 للهدف الأول و≥ 2 للثاني —
+  // فلا تُعرض خطة تخاطر بأكثر مما تربح. (الكلاسيكية تبقى للمقارنة فقط:
+  // كانت تعطي عائد/مخاطرة 0.1-0.3 على الزخم — رقم قصير خادع وهش عملياً.)
+  return "structure";
 }
 
 export function computeTargets(

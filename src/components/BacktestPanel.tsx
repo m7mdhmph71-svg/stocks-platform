@@ -233,6 +233,12 @@ export function BacktestPanel() {
                   <th className="p-2.5 text-end font-medium">نسبة رابحة</th>
                   <th className="p-2.5 text-end font-medium">متوسط العائد</th>
                   <th className="p-2.5 text-end font-medium">معامل الربح</th>
+                  <th className="p-2.5 text-end font-medium">
+                    هامش الأمان
+                    <span className="block text-[10px] font-normal text-zinc-400">
+                      إصابة − تعادل
+                    </span>
+                  </th>
                   <th className="p-2.5 text-end font-medium">متوسط الجلسات</th>
                 </tr>
               </thead>
@@ -261,10 +267,9 @@ export function BacktestPanel() {
                               الأفضل
                             </span>
                           ) : null}
-                          {v.key ===
-                          (strategy === "momentum" ? "classic" : "structure") ? (
+                          {v.key === "structure" ? (
                             <span className="ms-2 rounded-full bg-zinc-200 px-2 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
-                              المعتمدة حالياً
+                              المعتمدة للعرض
                             </span>
                           ) : null}
                           <span className="block text-xs text-zinc-500 dark:text-zinc-400">
@@ -297,6 +302,27 @@ export function BacktestPanel() {
                         >
                           {v.profitFactor !== null
                             ? v.profitFactor.toFixed(2)
+                            : "—"}
+                        </td>
+                        <td
+                          className={
+                            "p-2.5 text-end tabular-nums " +
+                            (v.safetyMarginPct !== null
+                              ? v.safetyMarginPct >= 15
+                                ? "font-bold text-emerald-600 dark:text-emerald-400"
+                                : v.safetyMarginPct >= 5
+                                  ? "text-amber-600 dark:text-amber-400"
+                                  : "font-bold text-red-600 dark:text-red-400"
+                              : "")
+                          }
+                          title={
+                            v.breakEvenWinRate !== null
+                              ? `تتعادل عند إصابة ${v.breakEvenWinRate.toFixed(0)}% — كلما زاد الهامش زاد أمان الصيغة أمام تراجع الإصابة`
+                              : undefined
+                          }
+                        >
+                          {v.safetyMarginPct !== null
+                            ? `${v.safetyMarginPct >= 0 ? "+" : ""}${v.safetyMarginPct.toFixed(0)} نقطة`
                             : "—"}
                         </td>
                         <td className="p-2.5 text-end tabular-nums text-zinc-600 dark:text-zinc-300">

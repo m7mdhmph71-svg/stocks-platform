@@ -405,6 +405,15 @@ export interface VariantSummary {
   avgTradeReturn: number | null;
   profitFactor: number | null;
   avgSessionsHeld: number | null;
+  /**
+   * نسبة الإصابة المطلوبة للتعادل % = متوسط الخسارة ÷ (متوسط الربح +
+   * متوسط الخسارة). كلما قلّت زاد أمان الصيغة: خطة بعائد/مخاطرة جيد
+   * تتعادل بإصابة منخفضة فتحتمل تراجع نسبة الإصابة، وخطة تخاطر بأكثر
+   * مما تربح تحتاج إصابة عالية هشة تنهار عند أول تغيّر في السوق.
+   */
+  breakEvenWinRate: number | null;
+  /** هامش الأمان = الإصابة الفعلية − المطلوبة للتعادل (نقاط مئوية) */
+  safetyMarginPct: number | null;
 }
 
 export const VARIANT_META: Record<
@@ -549,20 +558,37 @@ function summarizeVariant(
 ): VariantSummary {
   const rets = outcomes.map((o) => o.ret);
   const wins = rets.filter((r) => r > 0);
+  const lossArr = rets.filter((r) => r < 0);
   const gains = wins.reduce((a, b) => a + b, 0);
-  const losses = rets.filter((r) => r < 0).reduce((a, b) => a + b, 0);
+  const losses = lossArr.reduce((a, b) => a + b, 0);
   const sessions = outcomes.map((o) => o.sessions);
+
+  const winRate =
+    outcomes.length > 0 ? (wins.length / outcomes.length) * 100 : null;
+  // نسبة التعادل من متوسطي الربح والخسارة الفعليين (لا من R/R المخطط)
+  const avgWin = wins.length > 0 ? gains / wins.length : null;
+  const avgLoss = lossArr.length > 0 ? Math.abs(losses) / lossArr.length : null;
+  const breakEvenWinRate =
+    avgWin !== null && avgLoss !== null && avgWin + avgLoss > 0
+      ? (avgLoss / (avgWin + avgLoss)) * 100
+      : null;
+
   return {
     key,
     ...VARIANT_META[key],
     closedTrades: outcomes.length,
-    winRate: outcomes.length > 0 ? (wins.length / outcomes.length) * 100 : null,
+    winRate,
     avgTradeReturn:
       rets.length > 0 ? rets.reduce((a, b) => a + b, 0) / rets.length : null,
     profitFactor: losses < 0 ? gains / Math.abs(losses) : null,
     avgSessionsHeld:
       sessions.length > 0
         ? sessions.reduce((a, b) => a + b, 0) / sessions.length
+        : null,
+    breakEvenWinRate,
+    safetyMarginPct:
+      winRate !== null && breakEvenWinRate !== null
+        ? winRate - breakEvenWinRate
         : null,
   };
 }

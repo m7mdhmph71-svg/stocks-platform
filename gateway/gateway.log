@@ -412,3 +412,784 @@ Closing session: SessionEntry {
 }
 [22:37:16] ⚠️ انقطع الاتصال (408) — إعادة محاولة بعد 5 ثوانٍ…
 [22:37:22] ✅ متصل بواتساب: 966559653465@s.whatsapp.net (lid: 221177964441834@lid)
+[22:57:17] ⚠️ خطأ في سحب التنبيهات: fetch failed
+Failed to decrypt message with any known session...
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Failed to decrypt message with any known session...
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Failed to decrypt message with any known session...
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Session error:Error: Bad MAC Error: Bad MAC
+    at Object.verifyMAC (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/crypto.js:87:15)
+    at SessionCipher.doDecryptWhisperMessage (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:250:16)
+    at async SessionCipher.decryptWithSessions (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:147:29)
+    at async 221177964441834.0 [as awaitable] (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/session_cipher.js:171:28)
+    at async _asyncQueueExecutor (/Users/mohsakher/sahm-local/gateway/node_modules/libsignal/src/queue_job.js:20:29)
+Closing open session in favor of incoming prekey bundle
+Closing session: SessionEntry {
+  _chains: {
+    'BUDEWQERLzjbUbupgUkaKW4kF6ANb8VsJZdAlaCW8tN+': { chainKey: [Object], chainType: 2, messageKeys: {} },
+    BRFKSBKYLwmkQ7h47yqH9IiGWxtFcXshueQssxWOwPZj: { chainKey: [Object], chainType: 1, messageKeys: {} }
+  },
+  registrationId: 980418280,
+  currentRatchet: {
+    ephemeralKeyPair: {
+      pubKey: <Buffer 05 11 4a 48 12 98 2f 09 a4 43 b8 78 ef 2a 87 f4 88 86 5b 1b 45 71 7b 21 b9 e4 2c b3 15 8e c0 f6 63>,
+      privKey: <Buffer a0 a6 c7 53 7d 0e 4f d6 47 f3 9f af 36 97 25 d6 14 12 14 ba c9 fa d2 00 d0 b6 81 50 e0 3e e6 76>
+    },
+    lastRemoteEphemeralKey: <Buffer 05 40 c4 59 01 11 2f 38 db 51 bb a9 81 49 1a 29 6e 24 17 a0 0d 6f c5 6c 25 97 40 95 a0 96 f2 d3 7e>,
+    previousCounter: 0,
+    rootKey: <Buffer cf 81 a5 ff 76 88 0f 08 f3 f6 85 60 08 3e 69 58 00 31 c6 e3 23 09 f5 9a 8d f5 ae 20 9d 57 c1 26>
+  },
+  indexInfo: {
+    baseKey: <Buffer 05 9b 16 28 38 d5 dc d3 69 20 84 71 41 46 26 d1 cd d8 41 b3 a9 77 0b 4f 2c f3 de 75 c9 58 52 a6 29>,
+    baseKeyType: 2,
+    closed: -1,
+    used: 1783522420856,
+    created: 1783522420856,
+    remoteIdentityKey: <Buffer 05 55 56 89 3f ab be 02 ef 49 2b 15 37 e0 5c 7f 9b fd 7b 78 c3 aa 68 09 16 eb 03 6b c8 52 85 e0 62>
+  }
+}
+Removing old closed session: SessionEntry {
+  _chains: {
+    'BU1hZYPN4f0YEuOgvFZZDVrYd4ho+agRYygyY5fANyM5': { chainKey: [Object], chainType: 1, messageKeys: {} }
+  },
+  registrationId: 980418280,
+  currentRatchet: {
+    ephemeralKeyPair: {
+      pubKey: <Buffer 05 4d 61 65 83 cd e1 fd 18 12 e3 a0 bc 56 59 0d 5a d8 77 88 68 f9 a8 11 63 28 32 63 97 c0 37 23 39>,
+      privKey: <Buffer 78 7c a7 eb f1 6d b3 7f 18 75 3c 02 55 af ed ff 4f d8 fa 4e 73 22 89 a6 e3 dc 8c a0 74 97 78 40>
+    },
+    lastRemoteEphemeralKey: <Buffer 05 d6 b3 b8 02 bc c1 39 36 2a 17 d0 bd fc 2c 99 9c f8 48 b2 ad 47 22 c5 40 77 e5 2e 84 dd ac 27 02>,
+    previousCounter: 0,
+    rootKey: <Buffer 1b 40 5d 9c a7 50 3b a3 fc fd 30 9c 1e 7d ee 90 bd 3f c8 2d 37 4a f3 bf 1d 50 17 7c f5 51 af 03>
+  },
+  indexInfo: {
+    baseKey: <Buffer 05 4e ad b3 a4 b0 35 e1 cf ec a0 dc c7 5a 29 4a d9 c1 91 08 42 be f9 59 0a e4 a2 15 bf a3 dd ac 5c>,
+    baseKeyType: 1,
+    closed: 1783323015441,
+    used: 1783274651152,
+    created: 1783274651152,
+    remoteIdentityKey: <Buffer 05 55 56 89 3f ab be 02 ef 49 2b 15 37 e0 5c 7f 9b fd 7b 78 c3 aa 68 09 16 eb 03 6b c8 52 85 e0 62>
+  },
+  pendingPreKey: {
+    signedKeyId: 12407264,
+    baseKey: <Buffer 05 4e ad b3 a4 b0 35 e1 cf ec a0 dc c7 5a 29 4a d9 c1 91 08 42 be f9 59 0a e4 a2 15 bf a3 dd ac 5c>,
+    preKeyId: 3587
+  }
+}
+[23:07:01] تجاهل رسالة من محادثة غير مسموحة: 174693617299659@lid
+[23:07:51] ⚠️ انقطع الاتصال (408) — إعادة محاولة بعد 5 ثوانٍ…
+[23:07:58] ✅ متصل بواتساب: 966559653465@s.whatsapp.net (lid: 221177964441834@lid)
+[23:08:50] تجاهل رسالة من محادثة غير مسموحة: 174693617299659@lid
