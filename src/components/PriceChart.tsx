@@ -14,6 +14,8 @@ export interface ChartLevel {
 /** صيغة علامات المحور الأفقي: تاريخ (افتراضي)، وقت للفترات اللحظية، شهر/سنة للمدى الطويل */
 export type TickMode = "date" | "time" | "month";
 
+type ChartMode = "candles" | "line";
+
 interface PriceChartProps {
   candles: Candle[];
   targets?: { label: string; price: number }[];
@@ -31,9 +33,14 @@ const PAD = { top: 16, right: 64, bottom: 28, left: 14 };
 const PLOT_W = W - PAD.left - PAD.right;
 const PLOT_H = H - PAD.top - PAD.bottom;
 
+/** فوق هذا العدد تصير أجساد الشموع أنحف من بكسل — نعرض خطاً */
+const MAX_CANDLES = 340;
+
 const COLOR_LINE = "#10b981"; // emerald-500
+const COLOR_UP = "#10b981";
+const COLOR_DOWN = "#ef4444";
 const COLOR_TARGET = "#10b981";
-const COLOR_STOP = "#ef4444"; // red-500
+const COLOR_STOP = "#ef4444";
 const COLOR_SMA50 = "#0ea5e9"; // sky-500
 const COLOR_SMA200 = "#8b5cf6"; // violet-500
 
@@ -47,6 +54,9 @@ export function PriceChart({
   currency = "$",
 }: PriceChartProps) {
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  const candlesPossible = candles.length >= 2 && candles.length <= MAX_CANDLES;
+  const [modePref, setModePref] = useState<ChartMode | null>(null);
+  const mode: ChartMode = candlesPossible ? (modePref ?? "candles") : "line";
 
   const tickLabel = (unixSeconds: number): string =>
     tickMode === "time"
@@ -58,9 +68,15 @@ export function PriceChart({
   const model = useMemo(() => {
     if (candles.length < 2) return null;
 
-    const closes = candles.map((c) => c.close);
-    let minC = Math.min(...closes);
-    let maxC = Math.max(...closes);
+    // مدى المحور الرأسي: في وضع الشموع من القمم والقيعان لا الإغلاقات فقط
+    let minC = Infinity;
+    let maxC = -Infinity;
+    for (const c of candles) {
+      const lo = mode === "candles" ? c.low : c.close;
+      const hi = mode === "candles" ? c.high : c.close;
+      if (lo < minC) minC = lo;
+      if (hi > maxC) maxC = hi;
+    }
 
     // المستويات الأفقية (تدخل في المدى فقط إذا كانت قريبة منطقياً من السعر)
     const levels: ChartLevel[] = [];
@@ -94,8 +110,7 @@ export function PriceChart({
     const yMin = Math.max(0, minC - span * 0.06);
     const yMax = maxC + span * 0.06;
 
-    const x = (i: number) =>
-      PAD.left + (i / (candles.length - 1)) * PLOT_W;
+    const x = (i: number) => PAD.left + (i / (candles.length - 1)) * PLOT_W;
     const y = (p: number) =>
       PAD.top + (1 - (p - yMin) / (yMax - yMin)) * PLOT_H;
 
@@ -116,20 +131,22 @@ export function PriceChart({
       yTicks.push(yMin + ((yMax - yMin) * i) / 4);
     }
 
-    // علامات المحور الأفقي (~5 تواريخ)
+    // علامات المحور الأفقي (~5 تواريخ) — نبدأ من طرف ونمنع لصق الأخيرتين
     const xTickIdx: number[] = [];
-    const step = Math.max(1, Math.floor((candles.length - 1) / 4));
-    for (let i = 0; i < candles.length; i += step) xTickIdx.push(i);
-    if (xTickIdx[xTickIdx.length - 1] !== candles.length - 1) {
-      xTickIdx.push(candles.length - 1);
-    }
+    const last = candles.length - 1;
+    const step = Math.max(1, Math.floor(last / 4));
+    for (let i = 0; i < last - step * 0.5; i += step) xTickIdx.push(i);
+    xTickIdx.push(last); // آخر جلسة دائماً على الحافة
 
     const drawableLevels = levels.filter(
       (lv) => lv.price >= yMin && lv.price <= yMax
     );
 
-    return { x, y, line, area, yTicks, xTickIdx, drawableLevels, yMin, yMax };
-  }, [candles, targets, stopLoss, sma50, sma200]);
+    // عرض جسد الشمعة
+    const bodyW = Math.max(1.5, (PLOT_W / candles.length) * 0.62);
+
+    return { x, y, line, area, yTicks, xTickIdx, drawableLevels, bodyW };
+  }, [candles, targets, stopLoss, sma50, sma200, mode]);
 
   if (!model) {
     return (
@@ -139,7 +156,7 @@ export function PriceChart({
     );
   }
 
-  const { x, y, line, area, yTicks, xTickIdx, drawableLevels } = model;
+  const { x, y, line, area, yTicks, xTickIdx, drawableLevels, bodyW } = model;
 
   function onMove(e: React.MouseEvent<SVGSVGElement>) {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -153,7 +170,9 @@ export function PriceChart({
   const hover = hoverIdx !== null ? candles[hoverIdx] : null;
 
   const legend: { label: string; color: string; dashed: boolean }[] = [
-    { label: "الإغلاق", color: COLOR_LINE, dashed: false },
+    mode === "line"
+      ? { label: "الإغلاق", color: COLOR_LINE, dashed: false }
+      : { label: "شمعة صاعدة/هابطة", color: COLOR_UP, dashed: false },
   ];
   if (targets.length > 0)
     legend.push({ label: "الأهداف", color: COLOR_TARGET, dashed: true });
@@ -166,11 +185,37 @@ export function PriceChart({
 
   return (
     <div className="relative" dir="ltr">
+      {/* مبدّل شموع/خط */}
+      {candlesPossible ? (
+        <div className="absolute left-0 -top-1 z-10 flex gap-1" dir="rtl">
+          {(
+            [
+              { key: "candles", label: "شموع" },
+              { key: "line", label: "خط" },
+            ] as Array<{ key: ChartMode; label: string }>
+          ).map((m) => (
+            <button
+              key={m.key}
+              type="button"
+              onClick={() => setModePref(m.key)}
+              className={
+                "rounded-full px-2.5 py-0.5 text-[11px] font-medium transition-colors " +
+                (mode === m.key
+                  ? "bg-zinc-800 text-white dark:bg-zinc-100 dark:text-zinc-900"
+                  : "bg-zinc-100 text-zinc-500 hover:text-zinc-800 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-100")
+              }
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="h-auto w-full select-none text-zinc-500 dark:text-zinc-400"
         role="img"
-        aria-label="الرسم البياني لسعر الإغلاق مع مستويات الأهداف والوقف"
+        aria-label="الرسم البياني للسعر مع مستويات الأهداف والوقف"
         onMouseMove={onMove}
         onMouseLeave={() => setHoverIdx(null)}
       >
@@ -206,29 +251,67 @@ export function PriceChart({
         ))}
 
         {/* تواريخ المحور الأفقي */}
-        {xTickIdx.map((i) => (
+        {xTickIdx.map((i, k) => (
           <text
             key={i}
             x={x(i)}
             y={H - 8}
             fontSize="11"
-            textAnchor="middle"
+            textAnchor={
+              k === 0 ? "start" : k === xTickIdx.length - 1 ? "end" : "middle"
+            }
             fill="currentColor"
           >
             {tickLabel(candles[i].time)}
           </text>
         ))}
 
-        {/* التظليل والخط */}
-        <path d={area} fill="url(#pc-fill)" />
-        <path
-          d={line}
-          fill="none"
-          stroke={COLOR_LINE}
-          strokeWidth="2"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
+        {/* السعر: شموع يابانية أو خط */}
+        {mode === "candles" ? (
+          <g>
+            {candles.map((c, i) => {
+              const up = c.close >= c.open;
+              const color = up ? COLOR_UP : COLOR_DOWN;
+              const cx = x(i);
+              const top = y(Math.max(c.open, c.close));
+              const bottom = y(Math.min(c.open, c.close));
+              const bodyH = Math.max(1, bottom - top);
+              return (
+                <g key={i}>
+                  <line
+                    x1={cx}
+                    x2={cx}
+                    y1={y(c.high)}
+                    y2={y(c.low)}
+                    stroke={color}
+                    strokeWidth={Math.min(1.2, bodyW / 3)}
+                  />
+                  <rect
+                    x={cx - bodyW / 2}
+                    y={top}
+                    width={bodyW}
+                    height={bodyH}
+                    fill={color}
+                    fillOpacity={up ? 0.85 : 1}
+                    rx={bodyW > 3 ? 0.8 : 0}
+                  />
+                </g>
+              );
+            })}
+          </g>
+        ) : (
+          <>
+            <path d={area} fill="url(#pc-fill)" />
+            <path
+              d={line}
+              fill="none"
+              stroke={COLOR_LINE}
+              strokeWidth="2"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+          </>
+        )}
 
         {/* المستويات الأفقية المتقطعة */}
         {drawableLevels.map((lv, i) => (
@@ -267,14 +350,16 @@ export function PriceChart({
               strokeOpacity="0.35"
               strokeDasharray="3 3"
             />
-            <circle
-              cx={x(hoverIdx)}
-              cy={y(hover.close)}
-              r="4"
-              fill={COLOR_LINE}
-              stroke="#fff"
-              strokeWidth="1.5"
-            />
+            {mode === "line" ? (
+              <circle
+                cx={x(hoverIdx)}
+                cy={y(hover.close)}
+                r="4"
+                fill={COLOR_LINE}
+                stroke="#fff"
+                strokeWidth="1.5"
+              />
+            ) : null}
           </g>
         ) : null}
       </svg>
@@ -292,14 +377,52 @@ export function PriceChart({
             }, -120%)`,
           }}
         >
-          <div className="font-bold tabular-nums text-zinc-900 dark:text-zinc-50">
-            {fmtPrice(hover.close, currency)}
-          </div>
-          <div className="text-zinc-500 dark:text-zinc-400">
-            {tickMode === "time"
-              ? `${fmtShortDateAr(hover.time)} ${fmtTimeAr(hover.time)}`
-              : fmtShortDateAr(hover.time)}
-          </div>
+          {mode === "candles" ? (
+            <div className="space-y-0.5">
+              <div className="font-bold tabular-nums text-zinc-900 dark:text-zinc-50">
+                {fmtPrice(hover.close, currency)}
+                <span
+                  className={
+                    "ms-1.5 text-[10px] font-medium " +
+                    (hover.close >= hover.open
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-red-600 dark:text-red-400")
+                  }
+                  dir="ltr"
+                >
+                  {hover.open > 0
+                    ? `${hover.close >= hover.open ? "+" : ""}${(
+                        ((hover.close - hover.open) / hover.open) *
+                        100
+                      ).toFixed(2)}%`
+                    : ""}
+                </span>
+              </div>
+              <div
+                className="tabular-nums text-[10px] text-zinc-500 dark:text-zinc-400"
+                dir="ltr"
+              >
+                O {fmtNum(hover.open, 2)} · H {fmtNum(hover.high, 2)} · L{" "}
+                {fmtNum(hover.low, 2)}
+              </div>
+              <div className="text-zinc-500 dark:text-zinc-400">
+                {tickMode === "time"
+                  ? `${fmtShortDateAr(hover.time)} ${fmtTimeAr(hover.time)}`
+                  : fmtShortDateAr(hover.time)}
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="font-bold tabular-nums text-zinc-900 dark:text-zinc-50">
+                {fmtPrice(hover.close, currency)}
+              </div>
+              <div className="text-zinc-500 dark:text-zinc-400">
+                {tickMode === "time"
+                  ? `${fmtShortDateAr(hover.time)} ${fmtTimeAr(hover.time)}`
+                  : fmtShortDateAr(hover.time)}
+              </div>
+            </>
+          )}
         </div>
       ) : null}
 

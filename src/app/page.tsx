@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PRESETS } from "@/lib/filters/presets";
 import { TREND_PRESET } from "@/lib/filters/trend";
 import { SearchBox } from "@/components/SearchBox";
+import { MarketOverview } from "@/components/MarketOverview";
 import { StrategyCard } from "@/components/StrategyCard";
 import { LimitDonut } from "@/components/LimitDonut";
 import { SectionTitle } from "@/components/ui";
@@ -54,6 +55,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* نبض السوق الآن */}
+      <MarketOverview />
 
       {/* ابدأ هنا — الرحلة في ثلاث خطوات */}
       <section className="border-b border-zinc-200 bg-white py-12 dark:border-zinc-800 dark:bg-zinc-900/40">

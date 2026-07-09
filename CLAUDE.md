@@ -56,6 +56,7 @@ npx prisma generate  # يعمل تلقائياً postinstall
   خاسرة بوضوح على كون 1-10$ (ينعكس سريعاً)، ولا حافة في «ليلة واحدة»
   (لا فجوات صباحية منتظمة). العينات صغيرة — أعد التدقيق مع اتساع النافذة.
 - `src/app/api/` — screener، stock/[ticker]، backtest، quotes، search،
+  market-overview (مؤشرات السوقين للرئيسية، كاش دقيقتين)،
   candles (شموع بكل الفترات لصفحة السهم)، digest (ملخص واتساب اليومي)،
   alerts (محرك التنبيهات اللحظية — تسحبه البوابة، منع التكرار عبر SentAlert)،
   whatsapp/{gateway,prefs,command} (وسيط ربط QR من المنصة، تفضيلات التنبيهات،

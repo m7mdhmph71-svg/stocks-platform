@@ -101,6 +101,27 @@ function parseConditionsParam(raw: string | null): FilterCondition[] {
   }
 }
 
+/** رسالة تحميل حية بعدّاد — أول فرز يفحص مئات الأسهم وقد يستغرق دقيقة */
+function LoadingNotice() {
+  const [seconds, setSeconds] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setSeconds((v) => v + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <div className="rounded-xl border border-zinc-200 p-4 text-center text-sm text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+      <span className="me-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-brand-500 border-t-transparent align-middle" />
+      نفرز السوق ونجري الفحص الشرعي لكل نتيجة…
+      {seconds >= 8 ? (
+        <span className="ms-1">
+          أول تحميل يفحص مئات الأسهم وقد يستغرق حتى دقيقة — النتائج تُخبَّأ
+          بعدها <span className="tabular-nums" dir="ltr">({seconds}ث)</span>
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
 export function ScreenerClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -408,7 +429,10 @@ export function ScreenerClient() {
 
       {/* النتائج */}
       {tab === "history" ? null : loading ? (
-        <TableSkeleton />
+        <>
+          <LoadingNotice />
+          <TableSkeleton />
+        </>
       ) : error ? (
         <ErrorBox message={error} onRetry={() => setRefresh((n) => n + 1)} />
       ) : tab === "custom" && customConditions.length === 0 ? (

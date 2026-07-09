@@ -21,10 +21,7 @@ export function PurificationCalc({
   // لا يمكن الحساب مطلقاً بدون أي من المعطيين
   if (perShare === null && ratio === null) {
     return (
-      <section className="card p-5 sm:p-6">
-        <h2 className="mb-3 text-lg font-bold text-zinc-900 dark:text-zinc-50">
-          حاسبة التطهير
-        </h2>
+      <section>
         <div className="rounded-xl border border-zinc-200 bg-zinc-50/70 p-4 text-sm leading-7 text-zinc-600 dark:border-zinc-800 dark:bg-zinc-800/40 dark:text-zinc-300">
           لا يمكن حساب مبلغ التطهير لهذا السهم: تحتاج الحاسبة إلى نسبة التطهير
           أو نصيب السهم من الدخل غير المباح، ولا تتوفر البيانات المالية اللازمة
@@ -53,10 +50,7 @@ export function PurificationCalc({
     ratio !== null && validDividends ? dividendsN * (ratio / 100) : null;
 
   return (
-    <section className="card p-5 sm:p-6">
-      <h2 className="mb-1 text-lg font-bold text-zinc-900 dark:text-zinc-50">
-        حاسبة التطهير
-      </h2>
+    <section>
       <p className="mb-4 text-sm text-zinc-500 dark:text-zinc-400">
         احسب المبلغ الواجب التصدّق به لتطهير أرباحك من الدخل غير المباح.
       </p>

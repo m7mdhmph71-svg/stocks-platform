@@ -23,10 +23,7 @@ export function TechnicalsTable({
 }) {
   const t = indicators;
   return (
-    <section className="card p-5 sm:p-6">
-      <h2 className="mb-4 text-lg font-bold text-zinc-900 dark:text-zinc-50">
-        المؤشرات الفنية
-      </h2>
+    <section>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <Cell label="RSI (14)" value={fmtNum(t.rsi14, 1)} />
         <Cell label="ATR (14)" value={fmtPrice(t.atr14, currency)} />

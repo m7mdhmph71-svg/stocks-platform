@@ -215,14 +215,13 @@ export function StockDetail({
         </div>
       </header>
 
-      {/* الشرعية والأهداف — grid-cols-1 صراحةً كي يُحدّ العمود بـ minmax(0,1fr)
-          فلا يوسّعه نص غير قابل للكسر (truncate) في الجوال */}
+      {/* الجوهر أولاً: الحكم الشرعي والخطة الملائمة جنباً إلى جنب —
+          grid-cols-1 صراحةً كي يُحدّ العمود بـ minmax(0,1fr) في الجوال */}
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
-        <div className="min-w-0 space-y-6">
+        <div className="min-w-0">
           <ShariahCard shariah={row.shariah} />
-          <PurificationCalc shariah={row.shariah} />
         </div>
-        <div className="min-w-0 space-y-6">
+        <div className="min-w-0">
           <TargetsCard
             currency={currency}
             fit={data.fit}
@@ -232,7 +231,6 @@ export function StockDetail({
             analystTarget={data.analystTargetMean}
             analystRecommendation={data.analystRecommendation}
           />
-          <TechnicalsTable indicators={selected.indicators} currency={currency} />
         </div>
       </div>
 
@@ -294,6 +292,26 @@ export function StockDetail({
           />
         </div>
       </section>
+
+      {/* تفاصيل إضافية — مطوية كي لا تزاحم الجوهر */}
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+        <details className="card min-w-0 overflow-hidden">
+          <summary className="cursor-pointer px-5 py-4 font-bold text-zinc-900 transition-colors hover:bg-zinc-50 dark:text-zinc-50 dark:hover:bg-zinc-800/50">
+            المؤشرات الفنية التفصيلية
+          </summary>
+          <div className="border-t border-zinc-100 p-5 dark:border-zinc-800">
+            <TechnicalsTable indicators={selected.indicators} currency={currency} />
+          </div>
+        </details>
+        <details className="card min-w-0 overflow-hidden">
+          <summary className="cursor-pointer px-5 py-4 font-bold text-zinc-900 transition-colors hover:bg-zinc-50 dark:text-zinc-50 dark:hover:bg-zinc-800/50">
+            حاسبة التطهير اليدوية
+          </summary>
+          <div className="border-t border-zinc-100 p-5 dark:border-zinc-800">
+            <PurificationCalc shariah={row.shariah} />
+          </div>
+        </details>
+      </div>
 
       {/* ملاحظات */}
       {data.notesAr.length > 0 ? (
