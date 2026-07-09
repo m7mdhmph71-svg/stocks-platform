@@ -11,10 +11,6 @@ import { SAUDI_PRESET } from "@/lib/filters/saudi";
 import { TREND_PRESET, passesTrendTechnicals } from "@/lib/filters/trend";
 import { saudiNameAr } from "@/lib/saudi/companies";
 import { applyConditions, parseConditions } from "@/lib/filters/engine";
-import {
-  passesLongtermFundamentals,
-  passesLongtermTechnicals,
-} from "@/lib/filters/longterm";
 import { runYahooScreener, CoarseQuery } from "@/lib/yahoo/screener";
 import { fetchFundamentalsBatch } from "@/lib/yahoo/quote";
 import { fetchCandles } from "@/lib/yahoo/chart";
@@ -27,11 +23,10 @@ import { cached } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
-const PRESET_KEYS: StrategyKey[] = ["liquidity", "momentum", "longterm"];
+const PRESET_KEYS: StrategyKey[] = ["liquidity", "trend"];
 
 /** كم مرشحاً نثريه بالبيانات الأساسية كحد أقصى (كلفة الشبكة) */
 const ENRICH_CAP = 80;
-const LONGTERM_CAP = 400;
 
 /** استخراج استعلام خشن لياهو من الشروط المحلية (الحقول المدعومة فقط) */
 function coarseFromConditions(conds: FilterCondition[]): CoarseQuery {
@@ -284,15 +279,6 @@ async function screenLive(
     };
   }
 
-  if (preset === "longterm") {
-    // تضييق خادمي بالشروط الأساسية القابلة للتفويض — يقلص الكون من آلاف
-    // إلى بضع مئات، والبوابة المحلية (passesLongtermFundamentals) تبقى الحاسمة
-    coarse.cap = LONGTERM_CAP;
-    coarse.peMax = 25;
-    coarse.roeMinPct = 10;
-    coarse.debtEquityMaxPct = 100;
-    coarse.grossMarginMinPct = 0;
-  }
   let candidates = await runYahooScreener(coarse);
   if (preset === "saudi") {
     // الاسم العربي من فهرس تداول متى توفر
@@ -302,98 +288,7 @@ async function screenLive(
     }));
   }
 
-  if (preset === "longterm") {
-    // فلتر الاستثمار: بوابة أساسية ثم فنية
-    candidates = candidates.slice(0, LONGTERM_CAP);
-    if (candidates.length === LONGTERM_CAP) {
-      notesAr.push(
-        `تم فحص أعلى ${LONGTERM_CAP} مرشحاً بالحجم من نتائج الفرز الأولي.`
-      );
-    }
-    const funds = await fetchFundamentalsBatch(candidates.map((r) => r.ticker));
-    const survivors: StockRow[] = [];
-    let withData = 0;
-    const failTally = new Map<string, number>();
-    for (const r of candidates) {
-      const f0 = funds.get(r.ticker) ?? null;
-      if (!f0) continue;
-      withData++;
-      const f = {
-        ...f0,
-        marketCap: f0.marketCap ?? r.marketCap,
-        sharesOutstanding: f0.sharesOutstanding ?? r.sharesOutstanding,
-      };
-      const gate = passesLongtermFundamentals(f);
-      if (!gate.pass) {
-        for (const reason of gate.failsAr) {
-          failTally.set(reason, (failTally.get(reason) ?? 0) + 1);
-        }
-        continue;
-      }
-      survivors.push({
-        ...r,
-        sector: f.sector,
-        industry: f.industry,
-        floatShares: f.floatShares,
-        marketCap: r.marketCap ?? f.marketCap,
-        shariah: screenShariah(f),
-      });
-    }
-    console.log(
-      `longterm: candidates=${candidates.length} withData=${withData} passedFundamentals=${survivors.length}`,
-      "failTally:",
-      Object.fromEntries(failTally)
-    );
-    if (withData < candidates.length) {
-      notesAr.push(
-        `توفرت قوائم مالية كاملة لـ ${withData} من ${candidates.length} مرشحاً.`
-      );
-    }
-    // الشروط العادية (السعر/الحجم/الأسهم الحرة) بعد توفر float
-    let rows = applyConditions(survivors, conds);
-    console.log(
-      `longterm: afterConditions=${rows.length}`,
-      rows.map((r) => r.ticker).join(",")
-    );
-    // البوابة الفنية: ضمن 10% من قمة 50 يوم، RSI ≤ 60، فوق SMA200
-    const final: StockRow[] = [];
-    for (const r of rows) {
-      const candles = await fetchCandles(r.ticker, "1y");
-      if (candles.length < 200) {
-        console.log(`longterm tech: ${r.ticker} candles=${candles.length} → skip`);
-        continue;
-      }
-      const tech = computeTechnicals(candles);
-      const gate = passesLongtermTechnicals(r.price, tech);
-      if (!gate.pass) {
-        console.log(`longterm tech: ${r.ticker} fails: ${gate.failsAr.join("; ")}`);
-        continue;
-      }
-      final.push({
-        ...r,
-        weekPerfPercent: tech.weekPerfPercent,
-        targets: computeTargets(
-          "longterm",
-          r.price,
-          tech,
-          funds.get(r.ticker)?.targetMeanPrice ?? null
-        ),
-      });
-    }
-    notesAr.push(
-      "ملاحظة: نمو 5 سنوات مُقرَّب من آخر 4 سنوات متاحة، وROI مُقرَّب بالعائد على حقوق الملكية (حدود بيانات المصدر المجاني)."
-    );
-    return {
-      preset,
-      source: "yahoo",
-      asOf: new Date().toISOString(),
-      total: final.length,
-      rows: final,
-      notesAr,
-    };
-  }
-
-  // مضاربة/زخم/مخصص: فلترة ما هو متاح من بيانات الفرز مباشرة
+  // السيولة/المخصص: فلترة ما هو متاح من بيانات الفرز مباشرة
   const preFloatConds = conds.filter(
     (c) => c.field !== "floatShares" && c.field !== "weekPerfPercent"
   );
@@ -426,10 +321,10 @@ async function screenLive(
     rows = applyConditions(rows, weekConds);
   }
 
-  // الأهداف ودرجة الفرصة للنتائج النهائية (المخصص والسعودي بمنطق السوينق)
+  // الأهداف ودرجة الفرصة للنتائج النهائية (المخصص والسعودي بمنطق السيولة)
   rows = await enrichTargets(
     rows,
-    preset === "custom" || preset === "saudi" ? "momentum" : preset
+    preset === "custom" || preset === "saudi" ? "liquidity" : preset
   );
   if (rows.length > TARGETS_CAP) {
     notesAr.push(`حُسبت الأهداف والدرجة لأعلى ${TARGETS_CAP} نتيجة.`);
@@ -480,7 +375,7 @@ export async function GET(request: NextRequest) {
     conds = PRESETS[preset as Exclude<StrategyKey, "trend">].conditions;
   } else {
     return NextResponse.json(
-      { error: "فلتر غير معروف. الفلاتر المتاحة: liquidity, momentum, longterm, saudi, custom." },
+      { error: "فلتر غير معروف. الفلاتر المتاحة: liquidity, trend, saudi, saudi-trend, custom." },
       { status: 400 }
     );
   }

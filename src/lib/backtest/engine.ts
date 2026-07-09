@@ -26,10 +26,7 @@ import { computeTechnicals } from "@/lib/targets/technicals";
 import { computeTargets } from "@/lib/targets/engine";
 
 /** استراتيجيات قابلة للاختبار التاريخي (الاستثمار يتطلب قوائم مالية تاريخية) */
-export type BacktestStrategy = Extract<
-  StrategyKey,
-  "liquidity" | "momentum" | "trend"
->;
+export type BacktestStrategy = Extract<StrategyKey, "liquidity" | "trend">;
 
 export type TradeOutcome = "target" | "stop" | "time" | "open";
 
@@ -105,7 +102,6 @@ const MIN_HISTORY = 21;
 /** الاتجاه يحتاج تاريخ متوسط 200 يوم وقمم/قيعان 52 أسبوعاً */
 const MIN_HISTORY_TREND = 210;
 const RELVOL_WINDOW = 20;
-const WEEK_SESSIONS = 5;
 /** أفق المحاكاة: أقصى جلسات احتفاظ قبل الخروج الزمني */
 export const TRADE_HORIZON = 15;
 /** الاتجاه أبطأ إيقاعاً — أفقه ضعف أفق المضاربة */
@@ -137,6 +133,7 @@ function matchesAt(
   i: number
 ): { changeFromOpenPercent: number; changePercent: number } | null {
   if (strategy === "trend") return matchesTrendAt(candles, i);
+  // صيد السيولة
   const c = candles[i];
   const prev = candles[i - 1];
   if (!c || !prev || c.open <= 0 || prev.close <= 0) return null;
@@ -145,26 +142,11 @@ function matchesAt(
   const changeFromOpen = pct(c.close, c.open);
   const dayChange = pct(c.close, prev.close);
 
-  // مشترك بين الفلترين: السعر 1-10 والحجم أعلى من 500 ألف
   if (price < 1 || price > 10) return null;
   if (c.volume <= 500_000) return null;
-
-  if (strategy === "liquidity") {
-    // التغير من الافتتاح > 10% وأداء اليوم بين -10% و +10%
-    if (changeFromOpen <= 10) return null;
-    if (dayChange < -10 || dayChange > 10) return null;
-  } else {
-    // momentum: تغير من الافتتاح > 5%، حجم نسبي > 1، أداء أسبوع > 10%
-    if (changeFromOpen <= 5) return null;
-
-    let volSum = 0;
-    for (let k = i - RELVOL_WINDOW; k < i; k++) volSum += candles[k].volume;
-    const avgVol = volSum / RELVOL_WINDOW;
-    if (!(avgVol > 0) || c.volume / avgVol <= 1) return null;
-
-    const weekRef = candles[i - WEEK_SESSIONS];
-    if (weekRef.close <= 0 || pct(c.close, weekRef.close) <= 10) return null;
-  }
+  // التغير من الافتتاح > 10% وأداء اليوم بين -10% و +10%
+  if (changeFromOpen <= 10) return null;
+  if (dayChange < -10 || dayChange > 10) return null;
 
   return { changeFromOpenPercent: changeFromOpen, changePercent: dayChange };
 }

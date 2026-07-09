@@ -316,7 +316,7 @@ export function buildHelpReply(): string {
 
 export function buildStockReply(input: {
   row: StockRow;
-  momentum: { target: number | null; stop: number | null; rr: number | null };
+  trend: { target: number | null; stop: number | null; rr: number | null };
   liquidity: { target: number | null; stop: number | null; rr: number | null };
   purificationRatio: number | null;
   siteUrl?: string;
@@ -343,9 +343,9 @@ export function buildStockReply(input: {
     ].filter(Boolean);
     return `*${label}:* ${bits.join(" · ")}`;
   };
-  const m = strat("الزخم / السوينق", input.momentum);
+  const tr = strat("الاتجاه الصاعد", input.trend);
   const l = strat("صيد السيولة", input.liquidity);
-  if (m) lines.push(m);
+  if (tr) lines.push(tr);
   if (l) lines.push(l);
   lines.push("");
   lines.push(DISCLAIMER);

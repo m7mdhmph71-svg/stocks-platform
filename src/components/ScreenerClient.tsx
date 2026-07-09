@@ -29,7 +29,7 @@ import { EmptyState, ErrorBox } from "@/components/States";
 type Tab = StrategyKey | "custom" | "history";
 type Market = "us" | "sa";
 
-const STRATEGIES: StrategyKey[] = ["liquidity", "momentum", "trend", "longterm"];
+const STRATEGIES: StrategyKey[] = ["trend", "liquidity"];
 
 const MARKET_LABELS: Record<Market, string> = {
   us: "السوق الأمريكي",
@@ -39,9 +39,9 @@ const MARKET_LABELS: Record<Market, string> = {
 /** مفتاح الـ API للسوق والاستراتيجية — null = غير متاحة لهذا السوق بعد */
 function presetKeyFor(market: Market, strategy: StrategyKey): string | null {
   if (market === "us") return strategy;
-  if (strategy === "momentum") return "saudi";
   if (strategy === "trend") return "saudi-trend";
-  return null; // السيولة والاستثمار: بيانات تداول لا تكفيهما بعد
+  if (strategy === "liquidity") return "saudi"; // نشاط تداول اليومي
+  return null;
 }
 
 const VALID_FIELDS: FilterField[] = [
@@ -138,7 +138,7 @@ export function ScreenerClient() {
       : presetParam === "history"
         ? "history"
         : presetParam === "saudi"
-          ? "momentum"
+          ? "liquidity"
           : presetParam === "saudi-trend"
             ? "trend"
             : STRATEGIES.includes(presetParam as StrategyKey)
@@ -229,8 +229,8 @@ export function ScreenerClient() {
   const switchMarket = useCallback(
     (m: Market) => {
       const current: StrategyKey =
-        tab === "custom" || tab === "history" ? "momentum" : tab;
-      const key = presetKeyFor(m, current) ?? presetKeyFor(m, "momentum");
+        tab === "custom" || tab === "history" ? "trend" : tab;
+      const key = presetKeyFor(m, current) ?? presetKeyFor(m, "trend");
       if (key) go(key);
     },
     [tab, go]
@@ -248,17 +248,15 @@ export function ScreenerClient() {
     [router]
   );
 
-  /** لوحة دلالات Finviz — لفلاتر السوق الأمريكي الثلاثة الأصلية فقط */
+  /** لوحة دلالات Finviz — لفلتر السيولة في السوق الأمريكي فقط */
   const preset =
-    market === "us" && tab !== "custom" && tab !== "history" && tab !== "trend"
-      ? PRESETS[tab]
-      : null;
+    market === "us" && tab === "liquidity" ? PRESETS.liquidity : null;
   /** بطاقة الوصف بحسب (السوق، الاستراتيجية) */
   const info =
     tab === "custom" || tab === "history"
       ? null
       : market === "sa"
-        ? tab === "momentum"
+        ? tab === "liquidity"
           ? SAUDI_PRESET
           : {
               ...TREND_PRESET,
@@ -269,7 +267,7 @@ export function ScreenerClient() {
             }
         : tab === "trend"
           ? TREND_PRESET
-          : PRESETS[tab];
+          : PRESETS.liquidity;
 
   return (
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-8 sm:px-6">

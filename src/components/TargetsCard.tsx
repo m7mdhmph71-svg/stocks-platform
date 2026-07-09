@@ -4,7 +4,7 @@ import { StrategyKey, TargetsResult, Trend } from "@/lib/types";
 import type { StockFit } from "@/lib/targets/fit";
 import { fmtNum, fmtPercent, fmtPrice } from "@/lib/format";
 
-const STRATEGY_ORDER: StrategyKey[] = ["liquidity", "momentum", "trend", "longterm"];
+const STRATEGY_ORDER: StrategyKey[] = ["trend", "liquidity"];
 
 const REC_AR: Record<string, string> = {
   strong_buy: "شراء قوي",

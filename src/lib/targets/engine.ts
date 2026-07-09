@@ -1,28 +1,17 @@
 // ============================================================
 // محرك الأهداف والتوقعات — دوال نقية حتمية (بلا أي جلب بيانات).
 //
-// صيغتان للمضاربة (liquidity/momentum) — الافتراضي لكل استراتيجية
-// قرار تجريبي من مقارنة الاختبار التاريخي (defaultFormulaFor):
-// الزخم → الكلاسيكية، والسيولة → الهيكلية.
+// استراتيجيتان معتمدتان (liquidity, trend) كلتاهما على الصيغة الهيكلية:
+//  - الوقف يعرّف المخاطرة 1R: قاع متأرجح فعلي بهامش ربع ATR (ضمن
+//    [0.75, 2.5]×ATR)، وإلا وقف ATR محكوم عند 1.5× — لا يسقط لوقف
+//    SMA20 البعيد الذي يقلب العائد/المخاطرة.
+//  - الأهداف مضاعفات R على أقرب مستوى فعلي (قمم متأرجحة، محاور R1-R3،
+//    قمم 50ي/52أ): الهدف الأول ≥ 1R والثاني ≥ 2R — فلا تُقترح صفقة
+//    عائدها أقل من مخاطرتها.
 //
-// «الهيكلية» structure (معيار التداول الاحترافي المستقر):
-//  - الوقف: تحت آخر قاع متأرجح فعلي في الشارت (بهامش ربع ATR)، بشرط
-//    مسافة معقولة (0.75×ATR حتى 2.5×ATR من الدخول) — السوق يحترم
-//    القيعان الفعلية أكثر من المعادلات المجردة. عند غيابها: مرشحات
-//    الصيغة الكلاسيكية.
-//  - الأهداف: أقرب مستويات فعلية (قمم متأرجحة، محاور R1-R3، قمم
-//    50ي/52أ) مع حارس مضاعف المخاطرة: الهدف الأول لا يقل عن 1×
-//    المخاطرة، والثاني عن 2× — فلا تُقترح صفقة عائدها أقل من مخاطرتها.
-//
-// «الكلاسيكية» classic — الصيغة السابقة (ATR والمحاور) تُستبقى للمقارنة
-// في الاختبار التاريخي:
-//  - liquidity: T1/T2 = ATR×1/×2، T3 = الأدنى من (R2، قمة 50ي)؛
-//    الوقف = 1.5×ATR أو تحت S1 أيهما أعلى.
-//  - momentum: T1/T2 = R1/R2، T3 = قمة 52أ أو R3؛ الوقف = تحت SMA20
-//    أو 2×ATR أيهما أعلى.
-//
-//  - longterm (صيغة واحدة): T1 = هدف المحللين وإلا ×1.15، T2 = ×1.25،
-//    T3 = قمة 52أ ×1.10؛ الوقف = SMA200.
+// «الكلاسيكية» classic تبقى داخلياً لمقارنة الاختبار التاريخي فقط
+// (buildLiquidity للسيولة، buildMomentum للاتجاه) — كانت تعطي عائد/مخاطرة
+// 0.1-0.3 مقلوباً فلم تعد افتراضاً معروضاً.
 //
 // عند غياب بيانات فنية تُستبدل مستويات نسبية موثّقة في basisAr،
 // وتُضمن أهداف تصاعدية فوق سعر الدخول (أي مستوى دونه يُعدَّل بأقل
@@ -144,7 +133,7 @@ function structuralStop(
  * تعيد null عند غياب ATR — فيسقط الحساب للصيغة الكلاسيكية.
  */
 function buildStructured(
-  strategy: Exclude<StrategyKey, "longterm">,
+  strategy: StrategyKey,
   entry: number,
   t: TechnicalSnapshot
 ): { targets: RawTarget[]; stop: RawStop } | null {
@@ -323,50 +312,6 @@ function buildMomentum(
   return { targets: [t1, t2, t3], stop };
 }
 
-function buildLongterm(
-  entry: number,
-  t: TechnicalSnapshot,
-  analystTarget: number | null
-): { targets: RawTarget[]; stop: RawStop } {
-  const atr = isPos(t.atr14) ? t.atr14 : null;
-  const h52 = isPos(t.high52w) ? t.high52w : null;
-  const sma200 = isPos(t.sma200) ? t.sma200 : null;
-
-  const t1: RawTarget = isPos(analystTarget)
-    ? { price: analystTarget, basisAr: "متوسط هدف المحللين" }
-    : { price: entry * 1.15, basisAr: "تقدير نمو 15% لغياب هدف المحللين" };
-
-  const t2: RawTarget = {
-    price: entry * 1.25,
-    basisAr: "توقع نمو معقول بواقع 25% من سعر الدخول",
-  };
-
-  const t3: RawTarget = h52 !== null
-    ? { price: h52 * 1.1, basisAr: "قمة 52 أسبوعاً مضافاً إليها 10%" }
-    : { price: entry * 1.4, basisAr: "تقدير نمو ممتد 40% لغياب قمة 52 أسبوعاً" };
-
-  let stop: RawStop;
-  if (sma200 !== null && sma200 < entry) {
-    stop = {
-      price: roundPrice(sma200),
-      basisAr: "المتوسط المتحرك 200 يوم — كسره يعني كسر الاتجاه الطويل",
-    };
-  } else if (atr && entry - 2 * atr > 0) {
-    stop = {
-      price: roundPrice(entry - 2 * atr),
-      basisAr:
-        "2× مدى الحركة اليومي ATR تحت سعر الدخول (بديل لغياب متوسط 200 يوم صالح تحت السعر)",
-    };
-  } else {
-    stop = {
-      price: roundPrice(entry * 0.85),
-      basisAr: "حماية افتراضية عند -15% لغياب البيانات الفنية",
-    };
-  }
-
-  return { targets: [t1, t2, t3], stop };
-}
-
 /** الاتجاه العام من ترتيب السعر والمتوسطات */
 function computeTrend(
   entry: number,
@@ -489,17 +434,8 @@ function buildExpectationAr(
   return `${trendPhrase}${rsiPhrase}.${scenario}`;
 }
 
-/**
- * الصيغة الافتراضية لكل استراتيجية — قرار تجريبي من مقارنة الاختبار
- * التاريخي (30 جلسة): الكلاسيكية تتفوق على الزخم (أهداف قريبة تُصاب
- * قبل انعكاس القفزة)، والهيكلية على السيولة. أعد التدقيق دورياً من
- * زر «قارن صيغ الهدف/الوقف».
- */
+/** الصيغة المعتمدة للعرض: الهيكلية دائماً (عائد/مخاطرة سليم قابل للتنفيذ) */
 export function defaultFormulaFor(_strategy: StrategyKey): TargetFormula {
-  // كل استراتيجيات المضاربة على الصيغة الهيكلية: الوقف يعرّف المخاطرة (1R)
-  // والأهداف مضاعفات لها بحارس عائد/مخاطرة ≥ 1 للهدف الأول و≥ 2 للثاني —
-  // فلا تُعرض خطة تخاطر بأكثر مما تربح. (الكلاسيكية تبقى للمقارنة فقط:
-  // كانت تعطي عائد/مخاطرة 0.1-0.3 على الزخم — رقم قصير خادع وهش عملياً.)
   return "structure";
 }
 
@@ -530,13 +466,10 @@ export function computeTargets(
     };
   }
 
-  const at = analystTarget ?? null;
   const chosen = formula ?? defaultFormulaFor(strategy);
   let built: { targets: RawTarget[]; stop: RawStop };
-  if (strategy === "longterm") {
-    built = buildLongterm(entry, tech, at);
-  } else if (chosen === "structure") {
-    // الهيكلية أولاً — وعند غياب ATR تسقط للكلاسيكية تلقائياً
+  if (chosen === "structure") {
+    // الهيكلية أولاً — وعند غياب ATR تسقط للصيغة الكلاسيكية تلقائياً
     built =
       buildStructured(strategy, entry, tech) ??
       (strategy === "liquidity"

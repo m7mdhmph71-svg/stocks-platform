@@ -103,24 +103,17 @@ export default function HomePage() {
 
       {/* الاستراتيجيات الأربع */}
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
-        <SectionTitle sub="أربع استراتيجيات بمعايير شفافة ومختبرة تاريخياً — ولكل سهم تُرشَّح الخطة الملائمة له تلقائياً.">
+        <SectionTitle sub="استراتيجيتان مُثبَتتان بمعايير شفافة ومختبرة تاريخياً — ولكل سهم تُرشَّح الخطة الملائمة له تلقائياً.">
           استراتيجيات الفرز
         </SectionTitle>
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
           <StrategyCard
             href="/screener?preset=trend"
             nameAr={TREND_PRESET.nameAr}
             taglineAr={TREND_PRESET.taglineAr}
-            descriptionAr="أسهم جودة سائلة في اتجاه صاعد مؤكد قرب قممها السنوية — المنهج الأكثر توثيقاً واستقراراً، للسوقين الأمريكي والسعودي."
+            descriptionAr="أسهم جودة سائلة في اتجاه صاعد مؤكد قرب قممها السنوية — المنهج الأكثر توثيقاً واستقراراً، وأمتن الاثنتين في اختبارنا التاريخي. للسوقين الأمريكي والسعودي."
             chips={["فوق متوسط 200 يوم", "قرب قمة 52 أسبوعاً", "زخم شهري موجب", "أفق أسابيع"]}
             highlight
-          />
-          <StrategyCard
-            href="/screener?preset=momentum"
-            nameAr={PRESETS.momentum.nameAr}
-            taglineAr={PRESETS.momentum.taglineAr}
-            descriptionAr={PRESETS.momentum.descriptionAr}
-            chips={PRESETS.momentum.legend.map((l) => l.meaningAr)}
           />
           <StrategyCard
             href="/screener?preset=liquidity"
@@ -129,16 +122,10 @@ export default function HomePage() {
             descriptionAr={PRESETS.liquidity.descriptionAr}
             chips={PRESETS.liquidity.legend.map((l) => l.meaningAr)}
           />
-          <StrategyCard
-            href="/screener?preset=longterm"
-            nameAr={PRESETS.longterm.nameAr}
-            taglineAr={PRESETS.longterm.taglineAr}
-            descriptionAr={PRESETS.longterm.descriptionAr}
-            chips={PRESETS.longterm.legend.map((l) => l.meaningAr)}
-          />
         </div>
         <p className="mt-4 text-center text-xs text-zinc-400 dark:text-zinc-500">
-          السوق السعودي: متاح حالياً بالزخم والاتجاه الصاعد — البقية قريباً.
+          استراتيجيتان فقط — كل واحدة مُثبَتة بالاختبار التاريخي بعائد/مخاطرة
+          سليم وهامش أمان موجب. السوق السعودي متاح بالاثنتين.
         </p>
       </section>
 

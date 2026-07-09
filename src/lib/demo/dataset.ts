@@ -331,22 +331,6 @@ function passesPreset(r: StockRow, preset: StrategyKey): boolean {
         cfo !== null && cfo > 10 &&
         chg !== null && chg >= -10 && chg <= 10
       );
-    case "momentum":
-      return (
-        volume !== null && volume > 500_000 &&
-        floatShares !== null && floatShares > 20 * M &&
-        price >= 1 && price <= 10 &&
-        relativeVolume !== null && relativeVolume > 1 &&
-        cfo !== null && cfo > 5 &&
-        week !== null && week > 10
-      );
-    case "longterm":
-      return (
-        marketCap !== null && marketCap >= 300 * M &&
-        avgVolume3m !== null && avgVolume3m > 500_000 &&
-        floatShares !== null && floatShares > 50 * M &&
-        price > 5
-      );
     case "trend":
       // تقريب تجريبي: سيولة وجودة وسعر فوق 5 مع أداء شهري موجب
       return (

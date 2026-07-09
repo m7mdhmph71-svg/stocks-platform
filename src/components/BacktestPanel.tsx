@@ -13,19 +13,17 @@ import type {
   BacktestResponse,
 } from "@/app/api/backtest/route";
 
-type Strategy = "liquidity" | "momentum" | "trend";
+type Strategy = "trend" | "liquidity";
 
 const STRATEGY_LABELS: Record<Strategy, string> = {
-  liquidity: "صيد السيولة",
-  momentum: "الزخم / السوينق",
   trend: "الاتجاه الصاعد",
+  liquidity: "صيد السيولة",
 };
 
 /** خيارات النافذة: المضاربة قصيرة، والاتجاه يحتاج مدى يكتمل فيه أفقه (30 جلسة) */
 const DAY_OPTIONS_BY_STRATEGY: Record<Strategy, number[]> = {
-  liquidity: [10, 20, 30, 40],
-  momentum: [10, 20, 30, 40],
   trend: [60, 90, 120, 150],
+  liquidity: [10, 20, 30, 40],
 };
 
 const OUTCOME_CHIP: Record<
@@ -97,8 +95,8 @@ function StatTile({
 }
 
 export function BacktestPanel() {
-  const [strategy, setStrategy] = useState<Strategy>("momentum");
-  const [days, setDays] = useState(30);
+  const [strategy, setStrategy] = useState<Strategy>("trend");
+  const [days, setDays] = useState(120);
 
   const switchStrategy = useCallback((k: Strategy) => {
     setStrategy(k);
@@ -200,10 +198,6 @@ export function BacktestPanel() {
         >
           {comparing ? "جارٍ المقارنة…" : "⚖️ قارن صيغ الهدف/الوقف"}
         </button>
-        <span className="text-xs text-zinc-400 dark:text-zinc-500">
-          فلتر الاستثمار غير قابل للاختبار التاريخي (يتطلب قوائم مالية «كما
-          كانت» — غير متاحة مجاناً).
-        </span>
       </div>
 
       {comparing ? (

@@ -33,7 +33,6 @@ const FLOAT_LIMITS: Record<
   { min: number | null; max: number | null }
 > = {
   liquidity: { min: null, max: 50_000_000 },
-  momentum: { min: 20_000_000, max: null },
   trend: { min: null, max: null }, // كون الجودة لا يقيده شرط أسهم حرة
 };
 
@@ -193,18 +192,9 @@ export async function GET(request: NextRequest) {
   const sp = request.nextUrl.searchParams;
   const preset = sp.get("preset") ?? "";
 
-  if (preset === "longterm") {
+  if (preset !== "liquidity" && preset !== "trend") {
     return NextResponse.json(
-      {
-        error:
-          "فلتر الاستثمار طويل المدى لا يمكن اختباره تاريخياً بدقة: شروطه الأساسية (مكرر الربحية، النمو، العائد على الملكية…) تتطلب قوائم مالية «كما كانت» في كل تاريخ ماضٍ، وهي غير متاحة في المصادر المجانية. فلترا السيولة والزخم قابلان للاختبار لأن شروطهما سعرية بالكامل.",
-      },
-      { status: 400 }
-    );
-  }
-  if (preset !== "liquidity" && preset !== "momentum" && preset !== "trend") {
-    return NextResponse.json(
-      { error: "حدّد فلتراً قابلاً للاختبار: liquidity أو momentum أو trend." },
+      { error: "حدّد فلتراً قابلاً للاختبار: liquidity أو trend." },
       { status: 400 }
     );
   }

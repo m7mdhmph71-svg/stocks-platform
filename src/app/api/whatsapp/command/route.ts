@@ -79,8 +79,8 @@ async function stockReply(ticker: string): Promise<string> {
 
   const tech = computeTechnicals(candles);
   const shariah = screenShariah(fund);
-  const momentum = computeTargets(
-    "momentum",
+  const trend = computeTargets(
+    "trend",
     price,
     tech,
     fund?.targetMeanPrice ?? null
@@ -118,7 +118,7 @@ async function stockReply(ticker: string): Promise<string> {
   // يكون 0.0.0.0). الافتراضي رابط النشر المباشر، ويُخصَّص بـ PUBLIC_SITE_URL.
   return buildStockReply({
     row,
-    momentum: firstTargetOf(momentum),
+    trend: firstTargetOf(trend),
     liquidity: firstTargetOf(liquidity),
     purificationRatio: shariah.purificationRatio,
     siteUrl: process.env.PUBLIC_SITE_URL?.replace(/\/$/, "") || undefined,

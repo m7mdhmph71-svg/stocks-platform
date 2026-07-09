@@ -76,26 +76,6 @@ export function classifyStockFit(x: FitInput): StockFit {
     liquidity = { level: "partial", reasonAr: "في النطاق السعري لكن سيولته اليوم متواضعة" };
   }
 
-  // ————— الزخم / السوينق (1-10$ بحجم نسبي مرتفع) —————
-  let momentum: StrategyFitInfo;
-  if (x.isSaudi) {
-    // زخم تداول: نشاط أعلى من المعتاد
-    if (x.relativeVolume !== null && x.relativeVolume >= 1.2 && (vol ?? 0) >= 100_000) {
-      momentum = { level: "good", reasonAr: "نشاط تداول أعلى من معتاده" };
-    } else {
-      momentum = { level: "partial", reasonAr: "لا نشاط استثنائياً اليوم — راقب الحجم النسبي" };
-    }
-  } else if (price < 1 || price > 10) {
-    momentum = {
-      level: "poor",
-      reasonAr: "سعره خارج نطاق أسهم الزخم الخاطف (1-10$)",
-    };
-  } else if ((vol ?? 0) > 500_000 && (x.relativeVolume ?? 0) > 1) {
-    momentum = { level: "good", reasonAr: "سعر وحجم نسبي في نطاق موجات الزخم" };
-  } else {
-    momentum = { level: "partial", reasonAr: "في النطاق السعري لكن دون حجم نسبي مؤكد" };
-  }
-
   // ————— الاتجاه الصاعد (جودة سائلة قرب قممها) —————
   const qualitySize =
     price >= 5 && (x.marketCap === null || x.marketCap >= 300 * M);
@@ -118,42 +98,24 @@ export function classifyStockFit(x: FitInput): StockFit {
     };
   }
 
-  // ————— الاستثمار طويل المدى (جودة + اتجاه سليم) —————
-  let longterm: StrategyFitInfo;
-  if (!qualitySize || (x.avgVolume3m !== null && x.avgVolume3m < 100_000)) {
-    longterm = {
-      level: "poor",
-      reasonAr: "صغير أو ضعيف السيولة — خارج كون الاستثمار",
-    };
-  } else if (aboveSma200) {
-    longterm = { level: "good", reasonAr: "شركة كبيرة سائلة في اتجاه طويل سليم" };
-  } else {
-    longterm = {
-      level: "partial",
-      reasonAr: "جودة لكنه في مرحلة هبوط — للمراقبة لا للدخول الفوري",
-    };
-  }
-
   const perStrategy: Record<StrategyKey, StrategyFitInfo> = {
     liquidity,
-    momentum,
     trend,
-    longterm,
   };
 
   // — الترشيح: مضاربة أولاً لأسهمها، ثم الاتجاه، ثم الاستثمار —
   const priority: StrategyKey[] = x.isSaudi
-    ? ["trend", "momentum", "longterm", "liquidity"]
+    ? ["trend", "liquidity"]
     : price <= 10
-      ? ["momentum", "liquidity", "trend", "longterm"]
-      : ["trend", "longterm", "momentum", "liquidity"];
+      ? ["liquidity", "trend"]
+      : ["trend", "liquidity"];
 
   const recommended =
     priority.find((k) => perStrategy[k].level === "good") ?? null;
   const closest =
     recommended ??
     priority.find((k) => perStrategy[k].level === "partial") ??
-    "longterm";
+    "trend";
 
   const reasonAr = recommended
     ? perStrategy[recommended].reasonAr
